@@ -11,3 +11,18 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
 }
+
+@media not all and (min-width: 768px) {
+    #chatbar-visible {
+        transform: translateX(-100%);
+    }
+    #sidebar-invisible {
+        transform: translateX(-100%);
+    }
+}
+
+@media (pointer: fine) {
+    .custom-react-button:hover {
+        box-shadow: inset 0 0 0.1em 0 #61dbfb, 0 0 0.4em 0 #61dbfb;
+    }
+}

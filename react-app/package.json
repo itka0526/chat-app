@@ -9,8 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/cannon": "^6.5.2",
+    "@react-three/drei": "^9.56.18",
+    "@react-three/fiber": "^8.11.0",
+    "firebase": "^9.17.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-feather": "^2.0.10",
+    "react-firebase-hooks": "^5.1.1",
+    "three": "^0.149.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",
