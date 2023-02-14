@@ -10,8 +10,6 @@ const config = {
 
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 
 export const firebaseApp = initializeApp(config);
 export const firebaseAppAuth = getAuth(firebaseApp);
-export const firebaseAppFirestore = getFirestore(firebaseApp);
