@@ -7,7 +7,7 @@ import { ErrorTypes } from "./types";
  *
  */
 export const returnChatList = async (req: Request, res: Response): Promise<Response<any, Record<string, any>>> => {
-    const { email, displayName } = req.body;
+    const { email, displayName, profileImageURL } = req.body;
 
     /**
      * If there is a user with this 'email' then return user's 'chat_list'
@@ -37,6 +37,7 @@ export const returnChatList = async (req: Request, res: Response): Promise<Respo
             data: {
                 email: email,
                 displayName: displayName,
+                profileImageURL: profileImageURL,
             },
             select: {
                 chat_list: true,

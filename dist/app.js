@@ -17,6 +17,7 @@ const functions_1 = require("./functions");
 const socket_io_1 = require("socket.io");
 const http_1 = __importDefault(require("http"));
 const db_1 = require("./db");
+const socket_io_functions_1 = require("./socket.io-functions");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 4000;
 app.use(express_1.default.json());
@@ -30,27 +31,10 @@ io.use((socket, next) => __awaiter(void 0, void 0, void 0, function* () {
     return (yield (0, functions_1.exists)(db_1.prisma.user, { where: { email: userInfo.email } })) ? next() : socket.disconnect();
 }));
 io.on("connection", (socket) => {
-    socket.on("request_list_of_friends", (email) => __awaiter(void 0, void 0, void 0, function* () {
-        var _a;
-        // handle for if the user wants list of his friends
-        if (!email) {
-            const result = yield db_1.prisma.user.findUnique({
-                where: { email: (_a = socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email },
-                select: { friends: true },
-            });
-            if (result === null || result === void 0 ? void 0 : result.friends)
-                io.to(socket.id).emit("respond_list_of_friends", result === null || result === void 0 ? void 0 : result.friends);
-        }
-        // handle for if the user wants list of someone else's friends
-        if (email) {
-            const result = yield db_1.prisma.user.findUnique({
-                where: { email: email },
-                select: { friends: true },
-            });
-            if (result === null || result === void 0 ? void 0 : result.friends)
-                io.to(socket.id).emit("respond_list_of_friends", result === null || result === void 0 ? void 0 : result.friends);
-        }
-    }));
+    const { HandleFriendsInstance, HandleUserInstance } = new socket_io_functions_1.ServerSocketIOFunctions(io, socket);
+    HandleFriendsInstance.handleReturningOfListOfFriends();
+    HandleFriendsInstance.handleAddingFriends();
+    HandleUserInstance.findUsers();
 });
 //returns chat list
 app.post("/api/chats", functions_1.returnChatList);
