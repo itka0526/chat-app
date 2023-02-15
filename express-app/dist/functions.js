@@ -16,7 +16,7 @@ const db_1 = require("./db");
  *
  */
 const returnChatList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, displayName } = req.body;
+    const { email, displayName, profileImageURL } = req.body;
     /**
      * If there is a user with this 'email' then return user's 'chat_list'
      *
@@ -41,6 +41,7 @@ const returnChatList = (req, res) => __awaiter(void 0, void 0, void 0, function*
             data: {
                 email: email,
                 displayName: displayName,
+                profileImageURL: profileImageURL,
             },
             select: {
                 chat_list: true,

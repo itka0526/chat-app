@@ -1,4 +1,5 @@
 import { User } from "@prisma/client";
+import { Socket } from "socket.io";
 
 export type ErrorTypes =
     | "Email is invalid."
@@ -8,17 +9,31 @@ export type ErrorTypes =
 
 export type SocketIOUser = { email: string; displayName: string };
 
+// after this line copy and paste to 'react-app/src/serverTypes.ts'
+
+export type RespondAddFriendTypes = {
+    email: string;
+    message: "invalid_email" | "cannot_friend_yourself" | "user_does_not_exist" | "success" | "failed" | "already_friends" | "";
+};
+
+export type Notification = { type: "New Friend"; message: string };
+
+export type NotifyFunctionArgs = Notification & { socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData> };
+
 export interface ServerToClientEvents {
+    // only server to client events
+    notify: (notification: Notification) => void;
+    // respond with list of friends back to the 'socket'
     respond_list_of_friends: (friends: User[]) => void;
-    // noArg: () => void;
-    // basicEmit: (arg: string) => void;
-    // withAck: (d: string, callback: (e: number) => void) => void;
+    respond_add_friend: (response: RespondAddFriendTypes) => void;
+    respond_find_users: (user: User[]) => void;
 }
 
 export interface ClientToServerEvents {
-    // hello: () => void;
     // can be empty if empty will default to own friends
     request_list_of_friends: (email: string | undefined) => void;
+    add_friend: (email: string) => void;
+    find_users: (email: string) => void;
 }
 
 export interface InterServerEvents {

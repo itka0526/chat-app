@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import http from "http";
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData, SocketIOUser } from "./types";
 import { prisma } from "./db";
+import { ServerSocketIOFunctions } from "./socket.io-functions";
 
 const app = express();
 
@@ -23,24 +24,12 @@ io.use(async (socket, next) => {
 });
 
 io.on("connection", (socket) => {
-    socket.on("request_list_of_friends", async (email) => {
-        // handle for if the user wants list of his friends
-        if (!email) {
-            const result = await prisma.user.findUnique({
-                where: { email: socket.data.userInfo?.email },
-                select: { friends: true },
-            });
-            if (result?.friends) io.to(socket.id).emit("respond_list_of_friends", result?.friends);
-        }
-        // handle for if the user wants list of someone else's friends
-        if (email) {
-            const result = await prisma.user.findUnique({
-                where: { email: email },
-                select: { friends: true },
-            });
-            if (result?.friends) io.to(socket.id).emit("respond_list_of_friends", result?.friends);
-        }
-    });
+    const { HandleFriendsInstance, HandleUserInstance } = new ServerSocketIOFunctions(io, socket);
+
+    HandleFriendsInstance.handleReturningOfListOfFriends();
+    HandleFriendsInstance.handleAddingFriends();
+
+    HandleUserInstance.findUsers();
 });
 
 //returns chat list

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+    /* outline: 1px solid green; */
+}
+
 :root {
     font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
 
@@ -10,6 +14,16 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
+}
+
+.gradient-delimiter::before {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 20%, transparent 94%, rgba(0, 0, 0, 0.06));
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 @media not all and (min-width: 768px) {

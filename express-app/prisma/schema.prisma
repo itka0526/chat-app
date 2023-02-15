@@ -13,6 +13,7 @@ datasource db {
 model User {
   email            String    @id @unique
   displayName      String
+  profileImageURL  String
   chat_list        Chat[]
   messages         Message[]
   friends          User[]    @relation("UserFriends")
