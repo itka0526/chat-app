@@ -40,7 +40,7 @@ class HandleFriends extends BaseHelperClass {
                     select: { friends: true },
                 });
                 if (result === null || result === void 0 ? void 0 : result.friends)
-                    this.io.to(this.socket.id).emit("respond_list_of_friends", result === null || result === void 0 ? void 0 : result.friends);
+                    return this.io.to(this.socket.id).emit("respond_list_of_friends", result === null || result === void 0 ? void 0 : result.friends);
             }
             // handle for if the user wants list of someone else's friends
             if (email) {
@@ -49,7 +49,7 @@ class HandleFriends extends BaseHelperClass {
                     select: { friends: true },
                 });
                 if (result === null || result === void 0 ? void 0 : result.friends)
-                    this.io.to(this.socket.id).emit("respond_list_of_friends", result === null || result === void 0 ? void 0 : result.friends);
+                    return this.io.to(this.socket.id).emit("respond_list_of_friends", result === null || result === void 0 ? void 0 : result.friends);
             }
         }));
         this.handleAddingFriends = () => {
