@@ -34,6 +34,8 @@ export class ServerSocketIOFunctions extends BaseHelperClass {
     }
 }
 
+class HandleGroups extends BaseHelperClass {}
+
 class HandleFriends extends BaseHelperClass {
     public handleReturningOfListOfFriends = () =>
         this.socket.on("request_list_of_friends", async (email) => {

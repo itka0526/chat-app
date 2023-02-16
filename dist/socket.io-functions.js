@@ -28,6 +28,8 @@ class ServerSocketIOFunctions extends BaseHelperClass {
     }
 }
 exports.ServerSocketIOFunctions = ServerSocketIOFunctions;
+class HandleGroups extends BaseHelperClass {
+}
 class HandleFriends extends BaseHelperClass {
     constructor() {
         super(...arguments);
