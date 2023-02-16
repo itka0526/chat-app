@@ -40,12 +40,14 @@ export const AddingNewFriend = ({ input }: { input: string }) => {
     };
 
     return (
-        <ul className="w-full h-full p-2">
-            {modifiedUsers.map(({ displayName, email, profileImageURL, message }) => (
-                <UserListItem user={{ displayName, email, profileImageURL }} key={`adding-new-friend-list-item-${email}`}>
-                    <FoundUserStatus email={email} message={message} />
-                </UserListItem>
-            ))}
-        </ul>
+        <div className="bg-white grow">
+            <ul className="w-full h-full p-2">
+                {modifiedUsers.map(({ displayName, email, profileImageURL, message }) => (
+                    <UserListItem user={{ displayName, email, profileImageURL }} key={`adding-new-friend-list-item-${email}`}>
+                        <FoundUserStatus email={email} message={message} />
+                    </UserListItem>
+                ))}
+            </ul>
+        </div>
     );
 };

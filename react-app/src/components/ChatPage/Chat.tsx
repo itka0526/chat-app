@@ -5,6 +5,7 @@ import { useChangeFocus } from "../hooks/useChangeFocus";
 import { User } from "firebase/auth";
 import { SocketIOInstance } from "../../serverTypes";
 import { useSocketIO } from "../hooks/useSocketIO";
+import { Notification } from "./Notification";
 
 export const SocketIOContext = createContext<SocketIOInstance>(null);
 
@@ -15,17 +16,20 @@ export function Chats({ user }: { user: User }) {
     const socketIOInstance = useSocketIO(user);
 
     return (
-        <SocketIOContext.Provider value={socketIOInstance}>
-            <main
-                ref={mainRef}
-                className={`
+        <>
+            <Notification socket={socketIOInstance} />
+            <SocketIOContext.Provider value={socketIOInstance}>
+                <main
+                    ref={mainRef}
+                    className={`
             h-screen w-screen touch-none overflow-hidden
             flex flex-row  
             `}
-            >
-                <SideBar changeFocus={changeFocus} />
-                <ChatBar changeFocus={changeFocus} />
-            </main>
-        </SocketIOContext.Provider>
+                >
+                    <SideBar changeFocus={changeFocus} />
+                    <ChatBar changeFocus={changeFocus} />
+                </main>
+            </SocketIOContext.Provider>
+        </>
     );
 }

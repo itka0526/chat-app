@@ -24,3 +24,5 @@ export interface SidePanelTopTitleProps extends PropsWithChildren {
 }
 
 export type ModifiedUser = ServerUser & RespondAddFriendTypes;
+
+export type NewGroupMember = ServerUser & { added: boolean };

@@ -14,6 +14,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
+    --custom-grey: rgba(112, 117, 121, 0.08);
 }
 
 .gradient-delimiter::before {
@@ -38,5 +39,12 @@
 @media (pointer: fine) {
     .custom-react-button:hover {
         box-shadow: inset 0 0 0.1em 0 #61dbfb, 0 0 0.4em 0 #61dbfb;
+    }
+    .custom-reddening-effect:hover {
+        background-color: rgb(254 242 242 / 1);
+    }
+
+    .custom-reddening-effect:hover > div > .show-x-button {
+        opacity: 1;
     }
 }
