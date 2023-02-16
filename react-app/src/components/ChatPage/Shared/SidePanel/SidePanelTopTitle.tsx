@@ -1,6 +1,6 @@
-import { SidePanelTopTitleProps } from "../../../types";
+import { TopTitleProps } from "../../../../types";
 
-export function SidePanelTopTitle({ children, titleType }: SidePanelTopTitleProps) {
+export function SidePanelTopTitle({ children, titleType }: TopTitleProps) {
     const title = titleType === "new_group" ? "Add members" : titleType === "new_friend" ? "Add friend" : "";
 
     return (

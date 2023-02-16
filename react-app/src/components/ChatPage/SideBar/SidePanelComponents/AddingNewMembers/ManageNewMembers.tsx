@@ -8,7 +8,7 @@ export function ManageNewMembers({ members, modify }: { members: NewGroupMember[
                 (member) => member.added === true && <ManageNewMember modify={modify} member={member} key={`manage-member-item-${member.email}`} />
             )}
             <div className="min-w-[200px] grow pt-1 pb-2 h-11">
-                <input autoFocus={true} placeholder="Add friends..." className=" focus:outline-none w-full h-full px-2"></input>
+                <input placeholder="Add friends..." className=" focus:outline-none w-full h-full px-2"></input>
             </div>
         </div>
     );

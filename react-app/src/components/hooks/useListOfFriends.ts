@@ -16,7 +16,6 @@ export const useListOfFriends = (socket: SocketIOInstance) => {
         requestFriendList();
 
         const UpdateFriendsList = (friends: ServerUser[]) => {
-            console.log(friends);
             setFriends(friends);
         };
 

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { SideBar } from "./SideBar/Sidebar";
+import { LeftBar } from "./SideBar/LeftBar";
 import { ChatBar } from "./ChatBar/ChatBar";
 import { useChangeFocus } from "../hooks/useChangeFocus";
 import { User } from "firebase/auth";
@@ -26,7 +26,7 @@ export function Chats({ user }: { user: User }) {
             flex flex-row  
             `}
                 >
-                    <SideBar changeFocus={changeFocus} />
+                    <LeftBar changeFocus={changeFocus} />
                     <ChatBar changeFocus={changeFocus} />
                 </main>
             </SocketIOContext.Provider>

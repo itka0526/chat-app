@@ -12,14 +12,14 @@ export type ChatInfoList = ChatInfo[];
 
 export type FocusableOptions = "sidebar" | "chatbar";
 
-export type SidePanelStateTypes = "new_group" | "new_friend" | "";
+export type SidePanelStateTypes = "new_group" | "new_friend" | "give_new_chat_name" | "";
 
 export interface SidePanelState {
     open: boolean;
     type: SidePanelStateTypes;
 }
 
-export interface SidePanelTopTitleProps extends PropsWithChildren {
+export interface TopTitleProps extends PropsWithChildren {
     titleType: SidePanelStateTypes;
 }
 
