@@ -11,6 +11,7 @@ export function NewFriend() {
         <div className=" h-full w-full flex flex-col">
             <div className="w-full bg-white pt-1 pb-2">
                 <input
+                    autoFocus={true}
                     placeholder="Search with email..."
                     className="h-10 focus:outline-none w-full px-4"
                     onChange={(e) => setRawInput(e.target.value)}

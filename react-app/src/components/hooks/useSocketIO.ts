@@ -17,6 +17,10 @@ export function useSocketIO(userInfo: User) {
             });
             setSocket(ws);
         })();
+
+        return () => {
+            socket?.disconnect();
+        };
     }, []);
 
     return socket as SocketIOInstance;

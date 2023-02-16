@@ -46,7 +46,7 @@ export const useAddFriend = (socket: SocketIOInstance, input: string) => {
 
         socket.on("respond_add_friend", handleReponse);
         return () => {
-            socket.on("respond_add_friend", handleReponse);
+            socket.off("respond_add_friend", handleReponse);
         };
     }, [socket]);
 

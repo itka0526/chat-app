@@ -5,8 +5,8 @@ import { MainPanel } from "./MainPanel";
 
 export function SideBar({ changeFocus }: { changeFocus: (focusTo: FocusableOptions) => void }) {
     const [openSidePanel, setOpenSidePanel] = useState<SidePanelState>({
-        open: true,
-        type: "new_friend",
+        open: false,
+        type: "",
     });
 
     return (

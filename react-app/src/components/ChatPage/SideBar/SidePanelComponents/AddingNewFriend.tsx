@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { SocketIOContext } from "../../Chat";
 import { useAddFriend } from "../../../hooks/useAddFriend";
 import { ModifiedUser } from "../../../../types";
+import { UserListItem } from "../../Shared/UserListItem";
 
 export const AddingNewFriend = ({ input }: { input: string }) => {
     const socket = useContext(SocketIOContext);
@@ -41,16 +42,9 @@ export const AddingNewFriend = ({ input }: { input: string }) => {
     return (
         <ul className="w-full h-full p-2">
             {modifiedUsers.map(({ displayName, email, profileImageURL, message }) => (
-                <li key={`list-item-${email}`} className="flex items-center h-14 w-full rounded-md hover:bg-slate-100 cursor-pointer select-none">
-                    <img draggable={false} src={profileImageURL} className="rounded-full h-11 w-11 ml-2 mr-3" />
-                    <div className="flex flex-col whitespace-nowrap text-ellipsis overflow-hidden">
-                        <span className="font-medium">{displayName}</span>
-                        <span className="opacity-95 text-sm pl-2">{email}</span>
-                    </div>
-                    <div className="grow flex justify-end pr-2 ">
-                        <FoundUserStatus email={email} message={message} />
-                    </div>
-                </li>
+                <UserListItem user={{ displayName, email, profileImageURL }} key={`adding-new-friend-list-item-${email}`}>
+                    <FoundUserStatus email={email} message={message} />
+                </UserListItem>
             ))}
         </ul>
     );

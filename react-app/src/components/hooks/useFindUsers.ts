@@ -19,7 +19,7 @@ export const useFindUsers = (socket: SocketIOInstance, input: string) => {
 
         socket.on("respond_find_users", handleFoundUsers);
         return () => {
-            socket.on("respond_find_users", handleFoundUsers);
+            socket.off("respond_find_users", handleFoundUsers);
         };
     }, [socket]);
 

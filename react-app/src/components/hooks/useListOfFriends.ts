@@ -16,12 +16,13 @@ export const useListOfFriends = (socket: SocketIOInstance) => {
         requestFriendList();
 
         const UpdateFriendsList = (friends: ServerUser[]) => {
+            console.log(friends);
             setFriends(friends);
         };
 
         socket.on("respond_list_of_friends", UpdateFriendsList);
         return () => {
-            socket.on("respond_list_of_friends", UpdateFriendsList);
+            socket.off("respond_list_of_friends", UpdateFriendsList);
         };
     }, [socket]);
 

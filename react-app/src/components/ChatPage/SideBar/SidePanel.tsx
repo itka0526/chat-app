@@ -28,10 +28,7 @@ export function SidePanel({
                     <GoBack onArrowClick={handleBack} />
                 </SidePanelTopTitle>
             </TopBar>
-            {/* <div>{type === "new_group" ? <NewGroup /> : type === "new_friend" ? <NewFriend /> : <div />}</div> */}
-            <div>
-                <NewFriend />
-            </div>
+            <div>{type === "new_group" ? <NewGroup /> : type === "new_friend" ? <NewFriend /> : <div />}</div>
         </div>
     );
 }
