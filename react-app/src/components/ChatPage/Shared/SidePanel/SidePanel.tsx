@@ -24,7 +24,7 @@ export function SidePanel({
             absolute h-full w-full bg-slate-500
             ${open === false ? "translate-x-full" : "translate-x-0"} transition-transform
             grid grid-rows-[3.5rem,1fr]
-                `}
+            `}
         >
             <TopBar>
                 <SidePanelTopTitle titleType={type}>

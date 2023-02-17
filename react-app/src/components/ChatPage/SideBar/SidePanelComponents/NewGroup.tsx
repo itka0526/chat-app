@@ -1,36 +1,31 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { SocketIOContext } from "../../Chat";
-import { ServerUser } from "../../../../serverTypes";
 import { GradientDelimiter } from "../../Shared/GradientDelimiter";
 import { useAddNewMembers } from "../../../hooks/useAddNewMembers";
 import { AddingNewMembers } from "./AddingNewMembers/AddingNewMembers";
 import { ManageNewMembers } from "./AddingNewMembers/ManageNewMembers";
-import { ArrowRight } from "react-feather";
 import { useListOfFriends } from "../../../hooks/useListOfFriends";
+import { SidePanelState } from "../../../../types";
+import { StepControlButton } from "./AddingNewMembers/StepControlButton";
 
-export function NewGroup() {
+export function NewGroup({
+    setSecondSidePanel,
+    chatName,
+}: {
+    setSecondSidePanel: React.Dispatch<React.SetStateAction<SidePanelState>>;
+    chatName: string;
+}) {
     const socket = useContext(SocketIOContext);
     const { friends } = useListOfFriends(socket);
 
-    const { members, modify, send } = useAddNewMembers({ friends });
+    const { members, modify, next } = useAddNewMembers({ friends, chatName, handleStep: setSecondSidePanel });
 
     return (
-        <div className="h-full w-full flex flex-col relative">
+        <div className="h-full w-full flex flex-col">
             <ManageNewMembers members={members} modify={modify} />
             <GradientDelimiter />
             <AddingNewMembers members={members} modify={modify} />
-            <button
-                onClick={send}
-                title="send"
-                className="
-                            absolute bottom-5 right-5
-                            bg-blue-600 hover:brightness-110 transition-[filter]
-                            h-12 w-12 rounded-full
-                            flex justify-center items-center
-                            "
-            >
-                <ArrowRight width={25} height={25} color="white" />
-            </button>
+            <StepControlButton next={next} />
         </div>
     );
 }

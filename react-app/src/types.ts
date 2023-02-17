@@ -12,7 +12,7 @@ export type ChatInfoList = ChatInfo[];
 
 export type FocusableOptions = "sidebar" | "chatbar";
 
-export type SidePanelStateTypes = "new_group" | "new_friend" | "give_new_chat_name" | "";
+export type SidePanelStateTypes = "new_group" | "new_friend" | UseAddNewMembersSteps | "";
 
 export interface SidePanelState {
     open: boolean;
@@ -26,3 +26,5 @@ export interface TopTitleProps extends PropsWithChildren {
 export type ModifiedUser = ServerUser & RespondAddFriendTypes;
 
 export type NewGroupMember = ServerUser & { added: boolean };
+
+export type UseAddNewMembersSteps = "chat_1" | "chat_2";
