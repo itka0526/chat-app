@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Chat, User } from "@prisma/client";
 import { Socket } from "socket.io";
 
 export type ErrorTypes =
@@ -16,7 +16,7 @@ export type RespondAddFriendTypes = {
     message: "invalid_email" | "cannot_friend_yourself" | "user_does_not_exist" | "success" | "failed" | "already_friends" | "";
 };
 
-export type Notification = { type: "New Friend"; message: string };
+export type Notification = { type: "New Friend" | "Group Update" | "Unknown Error"; message: string };
 
 export type NotifyFunctionArgs = Notification & { socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData> };
 
@@ -27,13 +27,15 @@ export interface ServerToClientEvents {
     respond_list_of_friends: (friends: User[]) => void;
     respond_add_friend: (response: RespondAddFriendTypes) => void;
     respond_find_users: (user: User[]) => void;
+    //
+    respond_updated_chat_list: (list: Chat[]) => void;
 }
-
 export interface ClientToServerEvents {
     // can be empty if empty will default to own friends
     request_list_of_friends: (email: string | undefined) => void;
     add_friend: (email: string) => void;
     find_users: (email: string) => void;
+    create_group: (args: { admin: string; chatName: string; members: string[] }) => void;
 }
 
 export interface InterServerEvents {

@@ -1,29 +1,33 @@
 import { useContext } from "react";
-import { ChatInfo, FocusableOptions, SidePanelController, SidePanelState, SidePanelStateTypes } from "../../../types";
-import { ChatListContext } from "../../../App";
+import { FocusableOptions, SidePanelController } from "../../../types";
 import { SidePanelMenu } from "./SIdePanelMenu/SidePanelMenu";
 import { TopBar } from "../Shared/TopBar";
+import { SocketIOContext } from "../Chat";
+import { useChatList } from "../../hooks/useChatList";
+import { Chat } from "../../../serverTypes";
+import { MainPanelSearchBar } from "./MainPanelCompoenents/MainPanelSearchBar";
 
 export function MainPanel({
     nextWindow,
-    previousWindow,
     setWindowType,
     changeFocus,
 }: SidePanelController & {
     changeFocus: (focusTo: FocusableOptions) => void;
 }) {
-    const chatList = useContext(ChatListContext);
-
+    const socket = useContext(SocketIOContext);
+    const chatList = useChatList(socket);
     return (
         <div
             id="main-panel"
             className={`
-              bg-pink-400
+              bg-white
                 absolute w-full h-full grid grid-rows-[3.5rem,1fr]
             `}
         >
-            <TopBar />
-            <ul className="flex flex-col overflow-y-auto select-none">
+            <TopBar>
+                <MainPanelSearchBar />
+            </TopBar>
+            <ul className="flex flex-col overflow-y-auto select-none p-2 pt-0 ">
                 {chatList.map((chat, idx) => (
                     <ChatInfoComponent chatInfo={chat} changeFocus={changeFocus} key={`chat-${idx}`} />
                 ))}
@@ -33,17 +37,15 @@ export function MainPanel({
     );
 }
 
-function ChatInfoComponent({ chatInfo, changeFocus }: { chatInfo: ChatInfo; changeFocus: (focusTo: FocusableOptions) => void }) {
+function ChatInfoComponent({ chatInfo, changeFocus }: { chatInfo: Chat; changeFocus: (focusTo: FocusableOptions) => void }) {
     return (
         <li
             onClick={() => changeFocus("chatbar")}
-            className=" 
-                        hover:cursor-pointer
-                        flex flex-col justify-center
-                        min-h-[4.5rem]
-                        "
+            className={`flex items-center min-h-[3.5rem] w-full rounded-md hover:bg-slate-100 cursor-pointer select-none px-2`}
         >
-            {chatInfo.chatName}
+            <div className="flex flex-col w-full whitespace-nowrap text-ellipsis overflow-hidden">
+                <span className="font-medium">{chatInfo.chatName}</span>
+            </div>
         </li>
     );
 }

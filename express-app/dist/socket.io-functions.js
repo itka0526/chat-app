@@ -9,8 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ServerSocketIOFunctions = void 0;
+exports.ServerSocketIOFunctions = exports.consoleObject = void 0;
 const db_1 = require("./db");
+const promises_1 = require("fs/promises");
+const consoleObject = (args) => __awaiter(void 0, void 0, void 0, function* () { return yield (0, promises_1.writeFile)("../results.json", JSON.stringify([...args], null, 2)); });
+exports.consoleObject = consoleObject;
 class BaseHelperClass {
     constructor(io, socket) {
         this.socket = socket;
@@ -23,12 +26,60 @@ class BaseHelperClass {
 class ServerSocketIOFunctions extends BaseHelperClass {
     constructor(io, socket) {
         super(io, socket);
+        this.Initializer = new Initializer(this.io, this.socket);
         this.HandleFriendsInstance = new HandleFriends(this.io, this.socket);
         this.HandleUserInstance = new HandleUser(this.io, this.socket);
+        this.HandleGroupInstance = new HandleGroups(this.io, this.socket);
     }
 }
 exports.ServerSocketIOFunctions = ServerSocketIOFunctions;
+class Initializer extends BaseHelperClass {
+    constructor(io, socket) {
+        super(io, socket);
+        this.HandleChats = new HandleChats(this.io, this.socket);
+    }
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.HandleChats.returnChatListOfCurrentUser();
+        });
+    }
+}
 class HandleGroups extends BaseHelperClass {
+    CreateAndReturnUpdatedList() {
+        this.socket.on("create_group", ({ admin, chatName, members }) => __awaiter(this, void 0, void 0, function* () {
+            if (!admin || !chatName || !members)
+                return this.io.to(this.socket.id).emit("notify", { message: "Failed to create group.", type: "Unknown Error" });
+            // create chat with 'group'
+            yield db_1.prisma.chat.create({
+                data: {
+                    admin,
+                    chatName,
+                    members: {
+                        connect: [{ email: admin }, ...members.map((member) => ({ email: member }))],
+                    },
+                },
+            });
+            yield new HandleChats(this.io, this.socket).returnChatListOfCurrentUser();
+        }));
+    }
+}
+class HandleChats extends BaseHelperClass {
+    returnChatListOfCurrentUser() {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const newChats = yield db_1.prisma.user.findUnique({
+                select: {
+                    chat_list: true,
+                },
+                where: {
+                    email: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email,
+                },
+            });
+            if (!newChats || !newChats.chat_list)
+                return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+            this.io.to(this.socket.id).emit("respond_updated_chat_list", newChats.chat_list);
+        });
+    }
 }
 class HandleFriends extends BaseHelperClass {
     constructor() {
@@ -56,7 +107,7 @@ class HandleFriends extends BaseHelperClass {
         }));
         this.handleAddingFriends = () => {
             this.socket.on("add_friend", (email) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d, _e, _f, _g;
+                var _a, _b, _c, _d, _e, _f;
                 // if 'email' is invalid automatically respond with false result
                 if (typeof email != "string" || !email.includes("@"))
                     return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "invalid_email" });
@@ -93,31 +144,15 @@ class HandleFriends extends BaseHelperClass {
                         email: true,
                     },
                 });
-                //update the other user's friends list
-                const otherUser = yield db_1.prisma.user.update({
-                    where: {
-                        email: requestedToThisUser.email,
-                    },
-                    data: {
-                        friends: {
-                            connect: {
-                                email: (_e = this.socket.data.userInfo) === null || _e === void 0 ? void 0 : _e.email,
-                            },
-                        },
-                    },
-                    select: {
-                        email: true,
-                    },
-                });
                 // notify the other user
                 for (const socket of this.io.of("/").sockets) {
-                    if (((_f = socket[1].data.userInfo) === null || _f === void 0 ? void 0 : _f.email) === otherUser.email) {
+                    if (((_e = socket[1].data.userInfo) === null || _e === void 0 ? void 0 : _e.email) === email) {
                         this.notify({ socket: socket[1], type: "New Friend", message: `${original.email} added you as a friend.` });
                         break;
                     }
                 }
-                // successfully friended both
-                if (original.email === ((_g = this.socket.data.userInfo) === null || _g === void 0 ? void 0 : _g.email) && otherUser.email === email)
+                // success
+                if (original.email === ((_f = this.socket.data.userInfo) === null || _f === void 0 ? void 0 : _f.email))
                     return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "success" });
                 // else some unknown exception happened along the way
                 else

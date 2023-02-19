@@ -1,6 +1,9 @@
 import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, InterServerEvents, NotifyFunctionArgs, ServerToClientEvents, SocketData } from "./types";
 import { prisma } from "./db";
+import { writeFile } from "fs/promises";
+
+export const consoleObject = async (args: any) => await writeFile("../results.json", JSON.stringify([...args], null, 2));
 
 class BaseHelperClass {
     public io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
@@ -22,6 +25,8 @@ class BaseHelperClass {
 export class ServerSocketIOFunctions extends BaseHelperClass {
     public HandleFriendsInstance: HandleFriends;
     public HandleUserInstance: HandleUser;
+    public HandleGroupInstance: HandleGroups;
+    public Initializer: Initializer;
 
     constructor(
         io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>,
@@ -29,12 +34,70 @@ export class ServerSocketIOFunctions extends BaseHelperClass {
     ) {
         super(io, socket);
 
+        this.Initializer = new Initializer(this.io, this.socket);
+
         this.HandleFriendsInstance = new HandleFriends(this.io, this.socket);
         this.HandleUserInstance = new HandleUser(this.io, this.socket);
+        this.HandleGroupInstance = new HandleGroups(this.io, this.socket);
     }
 }
 
-class HandleGroups extends BaseHelperClass {}
+class Initializer extends BaseHelperClass {
+    public HandleChats: HandleChats;
+
+    constructor(
+        io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>,
+        socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
+    ) {
+        super(io, socket);
+
+        this.HandleChats = new HandleChats(this.io, this.socket);
+    }
+
+    public async initialize() {
+        await this.HandleChats.returnChatListOfCurrentUser();
+    }
+}
+
+class HandleGroups extends BaseHelperClass {
+    public CreateAndReturnUpdatedList() {
+        this.socket.on("create_group", async ({ admin, chatName, members }) => {
+            if (!admin || !chatName || !members)
+                return this.io.to(this.socket.id).emit("notify", { message: "Failed to create group.", type: "Unknown Error" });
+
+            // create chat with 'group'
+            await prisma.chat.create({
+                data: {
+                    admin,
+                    chatName,
+                    members: {
+                        connect: [{ email: admin }, ...members.map((member) => ({ email: member }))],
+                    },
+                },
+            });
+
+            await new HandleChats(this.io, this.socket).returnChatListOfCurrentUser();
+        });
+    }
+}
+
+class HandleChats extends BaseHelperClass {
+    public async returnChatListOfCurrentUser() {
+        const newChats = await prisma.user.findUnique({
+            select: {
+                chat_list: true,
+            },
+            where: {
+                email: this.socket.data.userInfo?.email,
+            },
+        });
+
+        if (!newChats || !newChats.chat_list)
+            return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+
+        this.io.to(this.socket.id).emit("respond_updated_chat_list", newChats.chat_list);
+    }
+}
 
 class HandleFriends extends BaseHelperClass {
     public handleReturningOfListOfFriends = () =>
@@ -102,33 +165,16 @@ class HandleFriends extends BaseHelperClass {
                 },
             });
 
-            //update the other user's friends list
-            const otherUser = await prisma.user.update({
-                where: {
-                    email: requestedToThisUser.email,
-                },
-                data: {
-                    friends: {
-                        connect: {
-                            email: this.socket.data.userInfo?.email,
-                        },
-                    },
-                },
-                select: {
-                    email: true,
-                },
-            });
-
             // notify the other user
             for (const socket of this.io.of("/").sockets) {
-                if (socket[1].data.userInfo?.email === otherUser.email) {
+                if (socket[1].data.userInfo?.email === email) {
                     this.notify({ socket: socket[1], type: "New Friend", message: `${original.email} added you as a friend.` });
                     break;
                 }
             }
 
-            // successfully friended both
-            if (original.email === this.socket.data.userInfo?.email && otherUser.email === email)
+            // success
+            if (original.email === this.socket.data.userInfo?.email)
                 return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "success" });
             // else some unknown exception happened along the way
             else return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "failed" });

@@ -26,7 +26,7 @@ export function Chats({ user }: { user: User }) {
                     flex flex-row  
                     `}
                 >
-                    <LeftBar changeFocus={changeFocus} />
+                    <LeftBar changeFocus={changeFocus} user={user} />
                     <ChatBar changeFocus={changeFocus} />
                 </main>
             </SocketIOContext.Provider>

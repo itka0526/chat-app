@@ -1,34 +1,23 @@
 import { useEffect, useState } from "react";
-import { ChatInfoList } from "../../types";
-import { User } from "firebase/auth";
+import { Chat, SocketIOInstance } from "../../serverTypes";
 
-export const useChatList = (user: User | null | undefined) => {
-    const [chatList, setChatList] = useState<ChatInfoList>([]);
+export const useChatList = (socket: SocketIOInstance) => {
+    const [chatList, setChatList] = useState<Chat[]>([]);
 
     useEffect(() => {
-        if (!user) return;
+        if (!socket) return;
 
-        const callServer = async () => {
-            if (!user.email) return;
-
-            const pending_response = await fetch("/api/chats", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: user.email,
-                    displayName: user.displayName,
-                    profileImageURL: user.photoURL,
-                }),
-            });
-
-            const { chat_list }: { chat_list: [] } = await pending_response.json();
-            setChatList(chat_list);
+        const listener = (list: Chat[]) => {
+            console.log();
+            setChatList(list || []);
         };
 
-        callServer();
-    }, [user]);
+        socket.on("respond_updated_chat_list", listener);
+
+        return () => {
+            socket.off("respond_updated_chat_list", listener);
+        };
+    }, [socket]);
 
     return chatList;
 };

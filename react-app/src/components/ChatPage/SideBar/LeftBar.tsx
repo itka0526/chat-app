@@ -1,18 +1,14 @@
 import { useState } from "react";
-import { FocusableOptions, NewGroupMember, PossibleArgs, SidePanelController, SidePanelStateTypes } from "../../../types";
+import { FocusableOptions, SidePanelStateTypes } from "../../../types";
 import { MainPanel } from "./MainPanel";
-import { SidePanel } from "../Shared/SidePanel/SidePanel";
-import { NewGroup } from "./SidePanelComponents/NewGroup";
-import { NewFriend } from "./SidePanelComponents/NewFriend";
-import { AddingChatName } from "./SidePanelComponents/AddingNewMembers/AddingChatName";
 import { MultiStep } from "../Shared/MultiStep/MultiStep";
 import { useMultiStep } from "../../hooks/useMultiStep";
-import { TopBar } from "../Shared/TopBar";
-import { SidePanelTopTitle } from "../Shared/SidePanel/SidePanelTopTitle";
-import { GoBack } from "../Shared/GoBack";
 import { useHandleNewGroupStates } from "../../hooks/useHandleNewGroupStates";
+import { FirstWindow } from "./LeftBarPanels/FirstWindow";
+import { SecondWindow } from "./LeftBarPanels/SecondWindow";
+import { User } from "firebase/auth";
 
-export function LeftBar({ changeFocus }: { changeFocus: (focusTo: FocusableOptions) => void }) {
+export function LeftBar({ changeFocus, user }: { changeFocus: (focusTo: FocusableOptions) => void; user: User }) {
     const { newGroup, newGroupName, setNewGroup, setNewGroupName } = useHandleNewGroupStates();
 
     const { multiStepState, next, previous, setCount } = useMultiStep();
@@ -36,7 +32,7 @@ export function LeftBar({ changeFocus }: { changeFocus: (focusTo: FocusableOptio
                     previousWindow={previous}
                 />
                 <SecondWindow
-                    args={{ newGroup, newGroupName, setNewGroupName }}
+                    args={{ newGroup, newGroupName, setNewGroupName, user }}
                     windowType={windowType}
                     setWindowType={setWindowType}
                     nextWindow={next}
@@ -46,86 +42,3 @@ export function LeftBar({ changeFocus }: { changeFocus: (focusTo: FocusableOptio
         </section>
     );
 }
-
-const FirstWindow = ({
-    args,
-    windowType,
-    setWindowType,
-    nextWindow,
-    previousWindow,
-}: SidePanelController & {
-    args?: PossibleArgs;
-    windowType: SidePanelStateTypes;
-}) => {
-    const reset = () => {
-        previousWindow();
-        setTimeout(() => setWindowType(""), 150);
-    };
-
-    return (
-        <>
-            <TopBar>
-                <SidePanelTopTitle titleType={windowType}>
-                    <GoBack onArrowClick={reset} />
-                </SidePanelTopTitle>
-            </TopBar>
-            {windowType.startsWith("new_group") ? (
-                <NewGroup
-                    newGroup={args?.newGroup}
-                    setNewGroup={args?.setNewGroup}
-                    nextWindow={nextWindow}
-                    previousWindow={previousWindow}
-                    windowType={windowType}
-                    setWindowType={setWindowType}
-                />
-            ) : windowType.startsWith("new_friend") ? (
-                <NewFriend />
-            ) : (
-                <div />
-            )}
-        </>
-    );
-};
-
-const SecondWindow = ({
-    args,
-    windowType,
-    setWindowType,
-    previousWindow,
-}: SidePanelController & { args?: PossibleArgs; windowType: SidePanelStateTypes }) => {
-    const reset = () => {
-        previousWindow();
-        if (windowType === "new_group_2") {
-            setWindowType("new_group");
-        }
-    };
-
-    const nextStep = () => {
-        // go back by two windows
-        previousWindow();
-        previousWindow();
-        // it should fix the flickerign when transitioning to the initial state assuming each transition takes about 150ms
-
-        setTimeout(() => setWindowType(""), 400);
-    };
-
-    return (
-        <>
-            <TopBar>
-                <SidePanelTopTitle titleType={windowType}>
-                    <GoBack onArrowClick={reset} />
-                </SidePanelTopTitle>
-            </TopBar>
-            {windowType.startsWith("new_group") ? (
-                <AddingChatName
-                    newGroup={args?.newGroup}
-                    newGroupName={args?.newGroupName}
-                    setNewGroupName={args?.setNewGroupName}
-                    nextStep={nextStep}
-                />
-            ) : (
-                <div />
-            )}
-        </>
-    );
-};

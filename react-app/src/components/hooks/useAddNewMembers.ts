@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { NewGroupMember, PossibleArgs, SidePanelController, SidePanelState, SidePanelStateTypes } from "../../types";
 import { ServerUser } from "../../serverTypes";
 

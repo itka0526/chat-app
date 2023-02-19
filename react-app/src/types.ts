@@ -1,11 +1,13 @@
 import React, { PropsWithChildren } from "react";
 import { RespondAddFriendTypes, ServerUser } from "./serverTypes";
+import { User } from "firebase/auth";
 
 export type PossibleArgs = {
     newGroup?: NewGroupMember[];
     setNewGroup?: React.Dispatch<React.SetStateAction<NewGroupMember[]>>;
     newGroupName?: string;
     setNewGroupName?: React.Dispatch<React.SetStateAction<string>>;
+    user?: User;
 };
 
 export type SidePanelController = {
@@ -20,15 +22,6 @@ export type useMultiStepReturn = {
     next: () => void;
     setCount: React.Dispatch<React.SetStateAction<number>>;
 };
-
-export interface ChatInfo {
-    admin: string;
-    chatName: string;
-    createdAt: string;
-    id: number;
-}
-
-export type ChatInfoList = ChatInfo[];
 
 export type FocusableOptions = "sidebar" | "chatbar";
 
