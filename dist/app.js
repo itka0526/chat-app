@@ -31,10 +31,12 @@ io.use((socket, next) => __awaiter(void 0, void 0, void 0, function* () {
     return (yield (0, functions_1.exists)(db_1.prisma.user, { where: { email: userInfo.email } })) ? next() : socket.disconnect();
 }));
 io.on("connection", (socket) => {
-    const { HandleFriendsInstance, HandleUserInstance } = new socket_io_functions_1.ServerSocketIOFunctions(io, socket);
+    const { Initializer, HandleGroupInstance, HandleFriendsInstance, HandleUserInstance } = new socket_io_functions_1.ServerSocketIOFunctions(io, socket);
+    Initializer.initialize();
     HandleFriendsInstance.handleReturningOfListOfFriends();
     HandleFriendsInstance.handleAddingFriends();
     HandleUserInstance.findUsers();
+    HandleGroupInstance.CreateAndReturnUpdatedList();
 });
 //returns chat list
 app.post("/api/chats", functions_1.returnChatList);

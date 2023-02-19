@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 import http from "http";
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData, SocketIOUser } from "./types";
 import { prisma } from "./db";
-import { ServerSocketIOFunctions } from "./socket.io-functions";
+import { ServerSocketIOFunctions, consoleObject } from "./socket.io-functions";
 
 const app = express();
 
@@ -24,12 +24,16 @@ io.use(async (socket, next) => {
 });
 
 io.on("connection", (socket) => {
-    const { HandleFriendsInstance, HandleUserInstance } = new ServerSocketIOFunctions(io, socket);
+    const { Initializer, HandleGroupInstance, HandleFriendsInstance, HandleUserInstance } = new ServerSocketIOFunctions(io, socket);
+
+    Initializer.initialize();
 
     HandleFriendsInstance.handleReturningOfListOfFriends();
     HandleFriendsInstance.handleAddingFriends();
 
     HandleUserInstance.findUsers();
+
+    HandleGroupInstance.CreateAndReturnUpdatedList();
 });
 
 //returns chat list
