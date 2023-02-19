@@ -7,13 +7,13 @@ export function StepControlButton({ next }: { next: () => void }) {
             onClick={next}
             title="send"
             className="
-                            absolute bottom-5 right-5
+                            absolute bottom-5 right-5 cursor-pointer
                             bg-blue-600 hover:brightness-110 transition-[filter]
-                            h-12 w-12 rounded-full
+                            w-14 aspect-square rounded-full
                             flex justify-center items-center
                             "
         >
-            <ArrowRight width={25} height={25} color="white" />
+            <ArrowRight width={28} height={28} color="white" />
         </button>
     );
 }

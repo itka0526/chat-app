@@ -1,16 +1,15 @@
 import { useContext } from "react";
-import { ChatInfo, FocusableOptions, SidePanelState } from "../../../types";
+import { ChatInfo, FocusableOptions, SidePanelController, SidePanelState, SidePanelStateTypes } from "../../../types";
 import { ChatListContext } from "../../../App";
 import { SidePanelMenu } from "./SIdePanelMenu/SidePanelMenu";
 import { TopBar } from "../Shared/TopBar";
 
 export function MainPanel({
-    openSidePanel: { open },
-    setOpenSidePanel,
+    nextWindow,
+    previousWindow,
+    setWindowType,
     changeFocus,
-}: {
-    openSidePanel: SidePanelState;
-    setOpenSidePanel: React.Dispatch<React.SetStateAction<SidePanelState>>;
+}: SidePanelController & {
     changeFocus: (focusTo: FocusableOptions) => void;
 }) {
     const chatList = useContext(ChatListContext);
@@ -19,8 +18,7 @@ export function MainPanel({
         <div
             id="main-panel"
             className={`
-                bg-pink-400
-                ${open && "-translate-x-full"} transition-transform
+              bg-pink-400
                 absolute w-full h-full grid grid-rows-[3.5rem,1fr]
             `}
         >
@@ -30,7 +28,7 @@ export function MainPanel({
                     <ChatInfoComponent chatInfo={chat} changeFocus={changeFocus} key={`chat-${idx}`} />
                 ))}
             </ul>
-            <SidePanelMenu setOpenSidePanel={setOpenSidePanel} />
+            <SidePanelMenu setWindowType={setWindowType} nextWindow={nextWindow} />
         </div>
     );
 }

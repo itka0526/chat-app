@@ -1,33 +1,19 @@
-import { useEffect, useRef, useState } from "react";
-import { NewGroupMember } from "../../../../../types";
+import { PossibleArgs } from "../../../../../types";
 import { UserListItem } from "../../../Shared/UserListItem";
 import { StepControlButton } from "./StepControlButton";
 
 export function AddingChatName({
-    setChatName,
-    closeSecondSidePanel,
+    newGroup,
+    newGroupName,
+    setNewGroupName,
+    nextStep,
 }: {
-    setChatName: React.Dispatch<React.SetStateAction<string>>;
-    closeSecondSidePanel: () => void;
+    newGroup: PossibleArgs["newGroup"] | undefined;
+    newGroupName: PossibleArgs["newGroupName"] | undefined;
+    setNewGroupName: PossibleArgs["setNewGroupName"] | undefined;
+    nextStep: () => void;
 }) {
-    const [members, setMembers] = useState<NewGroupMember[]>([]);
-
-    useEffect(() => {
-        // i am a bad developer
-
-        const handleUpdate = () => {
-            const stringJson = localStorage.getItem("members") || "[]";
-            localStorage.removeItem("members");
-            const parsedJson: NewGroupMember[] = JSON.parse(stringJson);
-            setMembers(parsedJson);
-        };
-
-        window.addEventListener("members-updated-event", handleUpdate);
-
-        return () => {
-            window.removeEventListener("members-updated-event", handleUpdate);
-        };
-    }, []);
+    const canGoNext = () => newGroupName?.length !== 0 && nextStep();
 
     return (
         <div className="bg-white min-h-full w-full flex flex-col p-2">
@@ -35,20 +21,18 @@ export function AddingChatName({
                 <input
                     placeholder="Group Name"
                     className="focus:outline-none w-full h-full px-2 text-lg"
-                    onChange={(e) => setChatName(e.target.value)}
+                    onChange={(e) => setNewGroupName && setNewGroupName(e.target.value)}
                 />
             </div>
-            <div className="bg-white grow">
-                <div className="mt-2 mb-1 px-1 select-none">
-                    <span className="text-blue-600">{members.length} member</span>
-                </div>
+            <div className="mt-2 mb-1 px-1 select-none">
+                <span className="text-blue-600">{newGroup?.filter((member) => member.added).length} member</span>
+            </div>
+            <div className="bg-white overflow-y-auto max-h-full">
                 <ul className="w-full h-full pb-2">
-                    {members.map((member, idx) => (
-                        <UserListItem key={`listed-member-${member.email}-${idx}`} user={member} />
-                    ))}
+                    {newGroup?.map((member, idx) => member.added && <UserListItem key={`listed-member-${member.email}-${idx}`} user={member} />)}
                 </ul>
             </div>
-            <StepControlButton next={closeSecondSidePanel} />
+            <StepControlButton next={canGoNext} />
         </div>
     );
 }

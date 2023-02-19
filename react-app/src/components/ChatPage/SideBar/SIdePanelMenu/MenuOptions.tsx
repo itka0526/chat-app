@@ -1,12 +1,12 @@
 import { Icon, UserPlus, Users } from "react-feather";
-import { SidePanelState, SidePanelStateTypes } from "../../../../types";
+import { SidePanelController, SidePanelStateTypes } from "../../../../types";
 
 export const MenuOptions = ({
     open,
-    setOpenSidePanel,
-}: {
+    setWindowType,
+    nextWindow,
+}: Partial<SidePanelController> & {
     open: boolean;
-    setOpenSidePanel: React.Dispatch<React.SetStateAction<SidePanelState>>;
 }) => {
     return (
         <div
@@ -17,8 +17,8 @@ export const MenuOptions = ({
              shadow-md select-none`}
         >
             <ul className="text-sm font-medium">
-                <MenuOption CustomIcon={UserPlus} type="new_friend" text="Add Friend" setOpenSidePanel={setOpenSidePanel} />
-                <MenuOption CustomIcon={Users} type="new_group" text="New Group" setOpenSidePanel={setOpenSidePanel} />
+                <MenuOption CustomIcon={UserPlus} type="new_friend" text="Add Friend" setWindowType={setWindowType} nextWindow={nextWindow} />
+                <MenuOption CustomIcon={Users} type="new_group" text="New Group" setWindowType={setWindowType} nextWindow={nextWindow} />
             </ul>
         </div>
     );
@@ -28,18 +28,19 @@ const MenuOption = ({
     CustomIcon,
     type,
     text,
-    setOpenSidePanel,
-}: {
+    setWindowType,
+    nextWindow,
+}: Partial<SidePanelController> & {
     CustomIcon: Icon;
     type: SidePanelStateTypes;
     text: string;
-    setOpenSidePanel: React.Dispatch<React.SetStateAction<SidePanelState>>;
 }) => {
     return (
         <li
             className="hover:brightness-75 transition-[filter] bg-white rounded-md py-1 flex items-center cursor-pointer"
             onClick={() => {
-                setOpenSidePanel({ open: true, type: type });
+                setWindowType && setWindowType(type);
+                nextWindow && nextWindow();
             }}
         >
             <CustomIcon width={20} height={20} className="mx-4" />

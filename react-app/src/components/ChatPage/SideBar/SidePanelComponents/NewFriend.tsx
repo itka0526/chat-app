@@ -8,13 +8,13 @@ export function NewFriend() {
     const input = useDebounce(rawInput, 1000);
 
     return (
-        <div className=" h-full w-full flex flex-col">
-            <div className="w-full bg-white pt-1 pb-2">
+        <div className=" h-full w-full flex flex-col overflow-y-auto">
+            <div className="w-full bg-white pt-1 pb-2 h-11">
                 <input
                     placeholder="Search with email..."
-                    className="h-10 focus:outline-none w-full px-4 my-[-1px]"
+                    className="focus:outline-none w-full h-full px-4"
                     onChange={(e) => setRawInput(e.target.value)}
-                ></input>
+                />
             </div>
             <GradientDelimiter />
             <AddingNewFriend input={input} />

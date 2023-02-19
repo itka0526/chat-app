@@ -22,9 +22,9 @@ export function Chats({ user }: { user: User }) {
                 <main
                     ref={mainRef}
                     className={`
-            h-screen w-screen touch-none overflow-hidden
-            flex flex-row  
-            `}
+                    h-screen w-screen touch-none overflow-hidden
+                    flex flex-row  
+                    `}
                 >
                     <LeftBar changeFocus={changeFocus} />
                     <ChatBar changeFocus={changeFocus} />

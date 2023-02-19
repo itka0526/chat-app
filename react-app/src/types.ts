@@ -1,5 +1,25 @@
-import { PropsWithChildren } from "react";
+import React, { PropsWithChildren } from "react";
 import { RespondAddFriendTypes, ServerUser } from "./serverTypes";
+
+export type PossibleArgs = {
+    newGroup?: NewGroupMember[];
+    setNewGroup?: React.Dispatch<React.SetStateAction<NewGroupMember[]>>;
+    newGroupName?: string;
+    setNewGroupName?: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export type SidePanelController = {
+    nextWindow: () => void;
+    previousWindow: () => void;
+    setWindowType: React.Dispatch<React.SetStateAction<SidePanelStateTypes>>;
+};
+
+export type useMultiStepReturn = {
+    multiStepState: [number, React.Dispatch<React.SetStateAction<number>>];
+    previous: () => void;
+    next: () => void;
+    setCount: React.Dispatch<React.SetStateAction<number>>;
+};
 
 export interface ChatInfo {
     admin: string;
@@ -12,7 +32,7 @@ export type ChatInfoList = ChatInfo[];
 
 export type FocusableOptions = "sidebar" | "chatbar";
 
-export type SidePanelStateTypes = "new_group" | "new_friend" | UseAddNewMembersSteps | "";
+export type SidePanelStateTypes = "new_group" | "new_friend" | "new_group_2" | "";
 
 export interface SidePanelState {
     open: boolean;
@@ -26,5 +46,3 @@ export interface TopTitleProps extends PropsWithChildren {
 export type ModifiedUser = ServerUser & RespondAddFriendTypes;
 
 export type NewGroupMember = ServerUser & { added: boolean };
-
-export type UseAddNewMembersSteps = "chat_1" | "chat_2";

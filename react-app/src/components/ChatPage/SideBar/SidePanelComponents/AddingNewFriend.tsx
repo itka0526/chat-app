@@ -40,7 +40,7 @@ export const AddingNewFriend = ({ input }: { input: string }) => {
     };
 
     return (
-        <div className="bg-white grow">
+        <div className="bg-white overflow-y-auto h-full">
             <ul className="w-full h-full p-2">
                 {modifiedUsers.map(({ displayName, email, profileImageURL, message }) => (
                     <UserListItem user={{ displayName, email, profileImageURL }} key={`adding-new-friend-list-item-${email}`}>

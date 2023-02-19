@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Edit3, X, Users } from "react-feather";
-import { SidePanelState } from "../../../../types";
+import { SidePanelController, SidePanelStateTypes } from "../../../../types";
 import { MenuOptions } from "./MenuOptions";
 
-export function SidePanelMenu({ setOpenSidePanel }: { setOpenSidePanel: React.Dispatch<React.SetStateAction<SidePanelState>> }) {
+export function SidePanelMenu({ setWindowType, nextWindow }: Partial<SidePanelController>) {
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen((prev) => !prev);
 
@@ -25,7 +25,7 @@ export function SidePanelMenu({ setOpenSidePanel }: { setOpenSidePanel: React.Di
                 />
                 <X color="white" width={32} height={32} className={`absolute m-auto inset-0 transition-transform ${!open && "scale-0"}`} />
             </div>
-            <MenuOptions open={open} setOpenSidePanel={setOpenSidePanel} />
+            <MenuOptions open={open} setWindowType={setWindowType} nextWindow={nextWindow} />
         </div>
     );
 }

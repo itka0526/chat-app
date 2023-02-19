@@ -1,8 +1,8 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { firebaseAppAuth } from "../../firebase";
-import { Canvas } from "@react-three/fiber";
-import { Physics } from "@react-three/cannon";
-import { Model } from "./Model";
+import { Suspense, lazy } from "react";
+
+const ThreeJSReactModel = lazy(() => import("./FloatingReactIcon"));
 
 export function Login() {
     const signInWithGoogle = async () => {
@@ -12,12 +12,7 @@ export function Login() {
 
     return (
         <main className="h-screen w-screen overflow-hidden touch-none">
-            <Canvas>
-                <ambientLight intensity={0.7} />
-                <Physics gravity={[0, 0, 0]}>
-                    <Model />
-                </Physics>
-            </Canvas>
+            <Suspense fallback={<canvas />}>{/* <ThreeJSReactModel /> */}</Suspense>
             <button
                 title="Sign with google"
                 className="

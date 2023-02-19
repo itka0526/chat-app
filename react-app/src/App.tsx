@@ -10,16 +10,9 @@ export const ChatListContext = createContext<ChatInfoList>([]);
 
 function App() {
     const [user] = useAuthState(firebaseAppAuth);
-
     const chatList = useChatList(user);
 
-    return user ? (
-        <ChatListContext.Provider value={chatList}>
-            <Chats user={user} />
-        </ChatListContext.Provider>
-    ) : (
-        <Login />
-    );
+    return user ? <ChatListContext.Provider value={chatList}>{<Chats user={user} />}</ChatListContext.Provider> : <Login />;
 }
 
 export default App;

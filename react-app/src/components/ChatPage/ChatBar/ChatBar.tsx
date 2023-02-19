@@ -5,7 +5,6 @@ import { TopBar } from "../Shared/TopBar";
 export function ChatBar({ changeFocus }: { changeFocus: (focusTo: FocusableOptions) => void }) {
     return (
         <section
-            id="nothing"
             className="
                     transition-transform
                     w-3/4

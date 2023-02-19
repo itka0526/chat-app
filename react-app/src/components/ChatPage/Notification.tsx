@@ -10,7 +10,9 @@ export function Notification({ socket }: { socket: SocketIOInstance }) {
 
         socket?.on("notify", handleNotification);
 
-        return () => socket?.on("notify", handleNotification);
+        return () => {
+            socket?.off("notify", handleNotification);
+        };
     }, [socket]);
     return <div></div>;
 }
