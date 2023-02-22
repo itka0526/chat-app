@@ -10,15 +10,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model DatabaseUser {
   email           String    @id @unique
   displayName     String
   profileImageURL String
   chat_list       Chat[]
   messages        Message[]
 
-  friends          User[] @relation("UserFriends")
-  symmetricFriends User[] @relation("UserFriends")
+  friends          DatabaseUser[] @relation("UserFriends")
+  symmetricFriends DatabaseUser[] @relation("UserFriends")
 }
 
 // model User {  < This model is very hard to maintain because it can have duplicate rows.
@@ -40,21 +40,21 @@ model User {
 // }
 
 model Chat {
-  id        String    @id @unique @default(uuid())
+  id        String         @id @unique @default(uuid())
   chatName  String
   admin     String
-  members   User[]
+  members   DatabaseUser[]
   messages  Message[]
-  createdAt DateTime  @default(now())
+  createdAt DateTime       @default(now())
 }
 
 model Message {
-  id             Int      @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   text           String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  messenger      User     @relation(fields: [messengerEmail], references: [email])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  messenger      DatabaseUser @relation(fields: [messengerEmail], references: [email])
   messengerEmail String
-  chat           Chat     @relation(fields: [chatId], references: [id])
+  chat           Chat         @relation(fields: [chatId], references: [id])
   chatId         String
 }

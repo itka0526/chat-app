@@ -16,7 +16,7 @@ export function MainPanel({
     changeFocus: (args: changeFocusArgs) => void;
 }) {
     const socket = useContext(SocketIOContext);
-    const { chatList, loading } = useChatList(socket);
+    const { active, setActive, chatList, loading } = useChatList(socket);
 
     return (
         <div
@@ -33,7 +33,15 @@ export function MainPanel({
                 {loading ? (
                     <SkeletonChat />
                 ) : (
-                    chatList.map((chat, idx) => <ChatInfoComponent chatInfo={chat} changeFocus={changeFocus} key={`chat-${idx}`} />)
+                    chatList.map((chat, idx) => (
+                        <ChatInfoComponent
+                            active={active}
+                            setActive={setActive}
+                            chatInfo={chat}
+                            changeFocus={changeFocus}
+                            key={`chat-${idx}-${chat.id}`}
+                        />
+                    ))
                 )}
             </ul>
             <SidePanelMenu setWindowType={setWindowType} nextWindow={nextWindow} />
@@ -41,11 +49,26 @@ export function MainPanel({
     );
 }
 
-function ChatInfoComponent({ chatInfo, changeFocus }: { chatInfo: Chat; changeFocus: (args: changeFocusArgs) => void }) {
+function ChatInfoComponent({
+    active,
+    setActive,
+    chatInfo,
+    changeFocus,
+}: {
+    active: string | null;
+    setActive: React.Dispatch<React.SetStateAction<string | null>>;
+    chatInfo: Chat;
+    changeFocus: (args: changeFocusArgs) => void;
+}) {
     return (
         <li
-            onClick={() => changeFocus({ focusTo: "chatbar", chat: chatInfo })}
-            className={`flex items-center min-h-[3.5rem] w-full rounded-md hover:bg-slate-100 cursor-pointer select-none px-2`}
+            onClick={() => {
+                changeFocus({ focusTo: "chatbar", chat: chatInfo });
+                setActive(chatInfo.id);
+            }}
+            className={`flex items-center min-h-[3.5rem] w-full rounded-md ${
+                active === chatInfo.id ? "bg-slate-100" : "hover:bg-slate-100"
+            } cursor-pointer select-none px-2`}
         >
             <div className="flex flex-col w-full whitespace-nowrap text-ellipsis overflow-hidden">
                 <span className="font-medium">{chatInfo.chatName}</span>

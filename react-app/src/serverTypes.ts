@@ -5,23 +5,31 @@ export type SocketIOUser = { email: string; displayName: string };
 
 // prisma schemes
 
-export type ServerUser = {
+export type DatabaseUser = {
     email: string;
     displayName: string;
     profileImageURL: string;
 };
 
-export interface Chat {
-    id: number;
+export type Chat = {
+    id: string;
     chatName: string;
     admin: string;
     createdAt: Date;
-}
+};
+
+export type Message = {
+    id: number;
+    text: string;
+    createdAt: Date;
+    updatedAt: Date;
+    messengerEmail: string;
+    chatId: string;
+};
 
 export type SocketIOInstance = Socket<ServerToClientEvents, ClientToServerEvents> | null;
 
 // After this line copy from 'express-app/types.ts'
-
 export type RespondAddFriendTypes = {
     email: string;
     message: "invalid_email" | "cannot_friend_yourself" | "user_does_not_exist" | "success" | "failed" | "already_friends" | "";
@@ -35,19 +43,22 @@ export interface ServerToClientEvents {
     // only server to client events
     notify: (notification: Notification) => void;
     // respond with list of friends back to the 'socket'
-    respond_list_of_friends: (friends: ServerUser[]) => void;
+    respond_list_of_friends: (friends: DatabaseUser[]) => void;
     respond_add_friend: (response: RespondAddFriendTypes) => void;
-    respond_find_users: (user: ServerUser[]) => void;
+    respond_find_users: (user: DatabaseUser[]) => void;
     respond_chat_list: (list: Chat[]) => void;
+    respond_get_chat: (messages: UIMessage[]) => void;
+    respond_live_chat: (message: UIMessage) => void;
 }
 export interface ClientToServerEvents {
     // can be empty if empty will default to own friends
-    request_list_of_friends: (email: ServerUser["email"] | undefined) => void;
-    add_friend: (email: ServerUser["email"]) => void;
-    find_users: (email: ServerUser["email"]) => void;
-    create_group: (args: { admin: Chat["admin"]; chatName: Chat["chatName"]; members: ServerUser["email"][] }) => void;
+    request_list_of_friends: (email: DatabaseUser["email"] | undefined) => void;
+    add_friend: (email: DatabaseUser["email"]) => void;
+    find_users: (email: DatabaseUser["email"]) => void;
+    create_group: (args: { admin: Chat["admin"]; chatName: Chat["chatName"]; members: DatabaseUser["email"][] }) => void;
     chat_list: () => void;
-    chat: () => void;
+    get_chat: (chatId: Chat["id"]) => void;
+    post_chat: (chatId: Chat["id"], user: DatabaseUser, message: Message["text"]) => void;
 }
 
 export interface InterServerEvents {
@@ -57,3 +68,11 @@ export interface InterServerEvents {
 export interface SocketData {
     userInfo: SocketIOUser;
 }
+
+export type UIMessage = {
+    messageId: Message["id"];
+    text: Message["text"];
+    messengerEmail: DatabaseUser["email"];
+    displayName: DatabaseUser["displayName"];
+    profileImageURL: DatabaseUser["profileImageURL"];
+};

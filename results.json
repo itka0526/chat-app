@@ -1,24 +1,11 @@
 [
   {
-    "userFriends": [
-      {
-        "id": 1,
-        "userA_Email": "itka0526@gmail.com",
-        "userB_Email": "imback0526@gmail.com",
-        "status": true
+    "r": {
+      "chatName": "our room",
+      "_count": {
+        "members": 2,
+        "messages": 3
       }
-    ],
-    "friendUserFriends": []
-  },
-  {
-    "userFriends": [],
-    "friendUserFriends": [
-      {
-        "id": 1,
-        "userA_Email": "itka0526@gmail.com",
-        "userB_Email": "imback0526@gmail.com",
-        "status": true
-      }
-    ]
+    }
   }
 ]

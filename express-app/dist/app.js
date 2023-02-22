@@ -27,9 +27,9 @@ const io = new socket_io_1.Server(server, {
 });
 app.post("/api/userChecker", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userInfo = req.body;
-    const userExists = yield (0, functions_1.exists)(db_1.prisma.user, { where: { email: userInfo.email } });
+    const databaseUser = yield db_1.prisma.databaseUser.findUnique({ where: { email: userInfo.email } });
     try {
-        if (!userExists) {
+        if (!databaseUser) {
             const { displayName, email, profileImageURL } = userInfo;
             /**
              *  Insufficient data was somehow passed
@@ -39,7 +39,7 @@ app.post("/api/userChecker", (req, res) => __awaiter(void 0, void 0, void 0, fun
             /**
              *   Create the user in the database
              */
-            yield db_1.prisma.user.create({
+            yield db_1.prisma.databaseUser.create({
                 data: {
                     email: email,
                     displayName: displayName,
@@ -48,6 +48,18 @@ app.post("/api/userChecker", (req, res) => __awaiter(void 0, void 0, void 0, fun
                 select: null,
             });
             return res.status(200).send("User successfully created.");
+        }
+        /**
+         *  Updating user info, in case, user updated his google account or something.
+         */
+        if (databaseUser.displayName !== userInfo.displayName ||
+            databaseUser.email !== userInfo.email ||
+            databaseUser.profileImageURL !== userInfo.profileImageURL) {
+            yield db_1.prisma.databaseUser.update({
+                where: { email: userInfo.email },
+                data: { email: userInfo.email, displayName: userInfo.displayName, profileImageURL: userInfo.profileImageURL },
+            });
+            return res.status(200).send("User already exists. User was updated. ");
         }
         return res.status(200).send("User already exists.");
     }
@@ -58,7 +70,7 @@ app.post("/api/userChecker", (req, res) => __awaiter(void 0, void 0, void 0, fun
 }));
 io.use((socket, next) => __awaiter(void 0, void 0, void 0, function* () {
     const userInfo = socket.handshake.auth;
-    const userExists = yield (0, functions_1.exists)(db_1.prisma.user, { where: { email: userInfo.email } });
+    const userExists = yield (0, functions_1.exists)(db_1.prisma.databaseUser, { where: { email: userInfo.email } });
     /**
      *  Interesting, react app is sending 2 requests and prisma is failing one of the requests
      *  because of unique key constraint if failing maybe creation of user should be handled in the
@@ -85,7 +97,7 @@ io.use((socket, next) => __awaiter(void 0, void 0, void 0, function* () {
          *      - And also its this will be nessesary because if we check each time user writes to a group
          *      - it would be very slow  !
          */
-        const result = yield db_1.prisma.user.findUnique({
+        const result = yield db_1.prisma.databaseUser.findUnique({
             select: {
                 chat_list: {
                     select: {
@@ -123,7 +135,9 @@ io.use((socket, next) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 io.on("connection", (socket) => {
     const { HandleChatsInstance, HandleGroupInstance, HandleFriendsInstance, HandleUserInstance } = new socket_io_functions_1.ServerSocketIOFunctions(io, socket);
+    HandleChatsInstance.getChat();
     HandleChatsInstance.getChatList();
+    HandleChatsInstance.postChat();
     HandleFriendsInstance.handleReturningOfListOfFriends();
     HandleFriendsInstance.handleAddingFriends();
     HandleUserInstance.findUsers();

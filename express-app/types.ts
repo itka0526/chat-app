@@ -1,4 +1,4 @@
-import { Chat, User } from "@prisma/client";
+import { Chat, DatabaseUser, Message } from "@prisma/client";
 import { Socket } from "socket.io";
 
 export type ErrorTypes =
@@ -24,19 +24,22 @@ export interface ServerToClientEvents {
     // only server to client events
     notify: (notification: Notification) => void;
     // respond with list of friends back to the 'socket'
-    respond_list_of_friends: (friends: User[]) => void;
+    respond_list_of_friends: (friends: DatabaseUser[]) => void;
     respond_add_friend: (response: RespondAddFriendTypes) => void;
-    respond_find_users: (user: User[]) => void;
+    respond_find_users: (user: DatabaseUser[]) => void;
     respond_chat_list: (list: Chat[]) => void;
+    respond_get_chat: (messages: UIMessage[]) => void;
+    respond_live_chat: (message: UIMessage) => void;
 }
 export interface ClientToServerEvents {
     // can be empty if empty will default to own friends
-    request_list_of_friends: (email: User["email"] | undefined) => void;
-    add_friend: (email: User["email"]) => void;
-    find_users: (email: User["email"]) => void;
-    create_group: (args: { admin: Chat["admin"]; chatName: Chat["chatName"]; members: User["email"][] }) => void;
+    request_list_of_friends: (email: DatabaseUser["email"] | undefined) => void;
+    add_friend: (email: DatabaseUser["email"]) => void;
+    find_users: (email: DatabaseUser["email"]) => void;
+    create_group: (args: { admin: Chat["admin"]; chatName: Chat["chatName"]; members: DatabaseUser["email"][] }) => void;
     chat_list: () => void;
-    chat: () => void;
+    get_chat: (chatId: Chat["id"]) => void;
+    post_chat: (chatId: Chat["id"], user: DatabaseUser, message: Message["text"]) => void;
 }
 
 export interface InterServerEvents {
@@ -46,3 +49,11 @@ export interface InterServerEvents {
 export interface SocketData {
     userInfo: SocketIOUser;
 }
+
+export type UIMessage = {
+    messageId: Message["id"];
+    text: Message["text"];
+    messengerEmail: DatabaseUser["email"];
+    displayName: DatabaseUser["displayName"];
+    profileImageURL: DatabaseUser["profileImageURL"];
+};
