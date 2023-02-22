@@ -1,7 +1,11 @@
-import { FocusableOptions } from "../../types";
+import { useState } from "react";
+import { changeFocusArgs } from "../../types";
+import { Chat } from "../../serverTypes";
 
 export function useChangeFocus(parentElement: React.RefObject<HTMLElement>) {
-    const changeFocus = (focusTo: FocusableOptions) => {
+    const [currentChat, setCurrentChat] = useState<Chat | null>(null);
+    const changeFocus = ({ focusTo, chat }: changeFocusArgs) => {
+        setCurrentChat(chat);
         const sideBar = parentElement.current?.children[0],
             chatBar = parentElement.current?.children[1];
         if (focusTo === "sidebar") {
@@ -17,5 +21,5 @@ export function useChangeFocus(parentElement: React.RefObject<HTMLElement>) {
         }
     };
 
-    return { changeFocus };
+    return { changeFocus, currentChat };
 }

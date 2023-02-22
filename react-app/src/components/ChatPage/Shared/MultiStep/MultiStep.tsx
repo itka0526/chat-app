@@ -25,7 +25,7 @@ function Step({ index, children, visibleStep }: PropsWithChildren & { index: num
             }}
             className={`
                   absolute h-full w-full
-                  bg-purple-700 transition-transform
+                  bg-purple-700 transition-transform duration-300
                   grid grid-rows-[3.5rem,1fr]
                   `}
         >

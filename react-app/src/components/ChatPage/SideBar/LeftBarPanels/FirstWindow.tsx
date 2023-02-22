@@ -17,7 +17,7 @@ export const FirstWindow = ({
 }) => {
     const goBack = () => {
         previousWindow();
-        setTimeout(() => setWindowType(""), 150);
+        setTimeout(() => setWindowType(""), 300);
     };
 
     return (

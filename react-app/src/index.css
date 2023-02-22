@@ -17,6 +17,18 @@
     --custom-grey: rgba(112, 117, 121, 0.08);
 }
 
+.chat-parent {
+    background-image: url("/bg.jpeg");
+    background-size: 20%;
+    background-repeat: repeat;
+}
+
+.custom-shadow {
+    --tw-shadow: 0 4px 16px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
 .gradient-delimiter::before {
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 20%, transparent 94%, rgba(0, 0, 0, 0.06));
     bottom: 0;

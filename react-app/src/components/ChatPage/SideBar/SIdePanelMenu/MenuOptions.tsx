@@ -14,7 +14,7 @@ export const MenuOptions = ({
              ${open ? "scale-100 -translate-y-8" : "scale-0 translate-x-24 translate-y-1"} transition-transform
              absolute top-[-50px] left-[-155px]
              w-52 p-2 bg-white rounded-md
-             shadow-md select-none`}
+              select-none custom-shadow`}
         >
             <ul className="text-sm font-medium">
                 <MenuOption CustomIcon={UserPlus} type="new_friend" text="Add Friend" setWindowType={setWindowType} nextWindow={nextWindow} />

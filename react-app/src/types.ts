@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from "react";
-import { RespondAddFriendTypes, ServerUser } from "./serverTypes";
+import { Chat, RespondAddFriendTypes, ServerUser } from "./serverTypes";
 import { User } from "firebase/auth";
 
 export type PossibleArgs = {
@@ -39,3 +39,5 @@ export interface TopTitleProps extends PropsWithChildren {
 export type ModifiedUser = ServerUser & RespondAddFriendTypes;
 
 export type NewGroupMember = ServerUser & { added: boolean };
+
+export type changeFocusArgs = { focusTo: FocusableOptions; chat: Chat | null };

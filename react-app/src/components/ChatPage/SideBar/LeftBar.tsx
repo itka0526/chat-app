@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FocusableOptions, SidePanelStateTypes } from "../../../types";
+import { FocusableOptions, SidePanelStateTypes, changeFocusArgs } from "../../../types";
 import { MainPanel } from "./MainPanel";
 import { MultiStep } from "../Shared/MultiStep/MultiStep";
 import { useMultiStep } from "../../hooks/useMultiStep";
@@ -8,7 +8,7 @@ import { FirstWindow } from "./LeftBarPanels/FirstWindow";
 import { SecondWindow } from "./LeftBarPanels/SecondWindow";
 import { User } from "firebase/auth";
 
-export function LeftBar({ changeFocus, user }: { changeFocus: (focusTo: FocusableOptions) => void; user: User }) {
+export function LeftBar({ changeFocus, user }: { changeFocus: (args: changeFocusArgs) => void; user: User }) {
     const { newGroup, newGroupName, setNewGroup, setNewGroupName } = useHandleNewGroupStates();
 
     const { multiStepState, next, previous, setCount } = useMultiStep();
@@ -17,8 +17,9 @@ export function LeftBar({ changeFocus, user }: { changeFocus: (focusTo: Focusabl
 
     return (
         <section
+            id="nothing"
             className="
-                    transition-transform w-1/4 max-md:min-w-[100vw] bg-yellow-500
+                    transition-transform duration-300 w-1/4 max-md:min-w-[100vw] bg-yellow-500
                     relative overflow-hidden
                     "
         >

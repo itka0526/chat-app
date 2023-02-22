@@ -11,7 +11,7 @@ export const SocketIOContext = createContext<SocketIOInstance>(null);
 
 export function Chats({ user }: { user: User }) {
     const mainRef = useRef<HTMLElement>(null);
-    const { changeFocus } = useChangeFocus(mainRef);
+    const { changeFocus, currentChat } = useChangeFocus(mainRef);
 
     const socketIOInstance = useSocketIO(user);
 
@@ -27,7 +27,7 @@ export function Chats({ user }: { user: User }) {
                     `}
                 >
                     <LeftBar changeFocus={changeFocus} user={user} />
-                    <ChatBar changeFocus={changeFocus} />
+                    <ChatBar changeFocus={changeFocus} currentChat={currentChat} />
                 </main>
             </SocketIOContext.Provider>
         </>

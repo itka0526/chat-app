@@ -1,113 +1,23 @@
 [
   {
-    "email": "itka0526@gmail.com",
-    "displayName": "Itgelt Gankhulug",
-    "profileImageURL": "https://lh3.googleusercontent.com/a/AEdFTp6jEVJSm9w83ND8QRX1vLaUvemosxWLCN6CP4Ag=s96-c",
-    "chat_list": [
+    "userFriends": [
       {
         "id": 1,
-        "chatName": "123",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:20:10.653Z"
-      },
-      {
-        "id": 2,
-        "chatName": "James",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:41:44.329Z"
-      },
-      {
-        "id": 3,
-        "chatName": "obbb",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:43:09.814Z"
-      },
-      {
-        "id": 4,
-        "chatName": "12322",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:45:08.749Z"
-      },
-      {
-        "id": 5,
-        "chatName": "123444",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:46:40.599Z"
-      },
-      {
-        "id": 6,
-        "chatName": "123121",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:47:24.415Z"
-      },
-      {
-        "id": 7,
-        "chatName": "12312222",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:48:41.452Z"
+        "userA_Email": "itka0526@gmail.com",
+        "userB_Email": "imback0526@gmail.com",
+        "status": true
       }
     ],
-    "friends": [
-      {
-        "email": "imback0526@gmail.com",
-        "displayName": "Im Back",
-        "profileImageURL": "https://lh3.googleusercontent.com/a/AEdFTp5_LUXPicx8mw8BEZVdqfy2dKrxbEmN24VnqijE=s96-c"
-      }
-    ]
+    "friendUserFriends": []
   },
   {
-    "email": "imback0526@gmail.com",
-    "displayName": "Im Back",
-    "profileImageURL": "https://lh3.googleusercontent.com/a/AEdFTp5_LUXPicx8mw8BEZVdqfy2dKrxbEmN24VnqijE=s96-c",
-    "chat_list": [
+    "userFriends": [],
+    "friendUserFriends": [
       {
         "id": 1,
-        "chatName": "123",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:20:10.653Z"
-      },
-      {
-        "id": 2,
-        "chatName": "James",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:41:44.329Z"
-      },
-      {
-        "id": 3,
-        "chatName": "obbb",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:43:09.814Z"
-      },
-      {
-        "id": 4,
-        "chatName": "12322",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:45:08.749Z"
-      },
-      {
-        "id": 5,
-        "chatName": "123444",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:46:40.599Z"
-      },
-      {
-        "id": 6,
-        "chatName": "123121",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:47:24.415Z"
-      },
-      {
-        "id": 7,
-        "chatName": "12312222",
-        "admin": "itka0526@gmail.com",
-        "createdAt": "2023-02-19T15:48:41.452Z"
-      }
-    ],
-    "friends": [
-      {
-        "email": "itka0526@gmail.com",
-        "displayName": "Itgelt Gankhulug",
-        "profileImageURL": "https://lh3.googleusercontent.com/a/AEdFTp6jEVJSm9w83ND8QRX1vLaUvemosxWLCN6CP4Ag=s96-c"
+        "userA_Email": "itka0526@gmail.com",
+        "userB_Email": "imback0526@gmail.com",
+        "status": true
       }
     ]
   }

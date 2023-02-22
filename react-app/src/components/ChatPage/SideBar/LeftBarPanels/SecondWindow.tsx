@@ -32,7 +32,7 @@ export const SecondWindow = ({
         previousWindow();
         // it should fix the flickering when transitioning to the initial state assuming each transition takes about 150ms
 
-        setTimeout(() => setWindowType(""), 400);
+        setTimeout(() => setWindowType(""), 650);
 
         socket?.emit("create_group", { admin, chatName, members });
     };
