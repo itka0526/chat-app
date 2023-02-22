@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, InterServerEvents, NotifyFunctionArgs, ServerToClientEvents, SocketData } from "./types";
 import { prisma } from "./db";
 import { writeFile } from "fs/promises";
+import { exists } from "./functions";
 
 export const consoleObject = async (args: any) => await writeFile("../results.json", JSON.stringify([...args], null, 2));
 
@@ -26,7 +27,7 @@ export class ServerSocketIOFunctions extends BaseHelperClass {
     public HandleFriendsInstance: HandleFriends;
     public HandleUserInstance: HandleUser;
     public HandleGroupInstance: HandleGroups;
-    public Initializer: Initializer;
+    public HandleChatsInstance: HandleChats;
 
     constructor(
         io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>,
@@ -34,28 +35,10 @@ export class ServerSocketIOFunctions extends BaseHelperClass {
     ) {
         super(io, socket);
 
-        this.Initializer = new Initializer(this.io, this.socket);
-
+        this.HandleChatsInstance = new HandleChats(this.io, this.socket);
         this.HandleFriendsInstance = new HandleFriends(this.io, this.socket);
         this.HandleUserInstance = new HandleUser(this.io, this.socket);
         this.HandleGroupInstance = new HandleGroups(this.io, this.socket);
-    }
-}
-
-class Initializer extends BaseHelperClass {
-    public HandleChats: HandleChats;
-
-    constructor(
-        io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>,
-        socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
-    ) {
-        super(io, socket);
-
-        this.HandleChats = new HandleChats(this.io, this.socket);
-    }
-
-    public async initialize() {
-        await this.HandleChats.returnChatListOfCurrentUser();
     }
 }
 
@@ -76,26 +59,46 @@ class HandleGroups extends BaseHelperClass {
                 },
             });
 
-            await new HandleChats(this.io, this.socket).returnChatListOfCurrentUser();
+            const result = await prisma.user.findUnique({
+                select: {
+                    chat_list: true,
+                },
+                where: {
+                    email: this.socket.data.userInfo?.email,
+                },
+            });
+
+            if (!result || !result.chat_list)
+                return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+
+            this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
         });
     }
 }
 
 class HandleChats extends BaseHelperClass {
-    public async returnChatListOfCurrentUser() {
-        const newChats = await prisma.user.findUnique({
-            select: {
-                chat_list: true,
-            },
-            where: {
-                email: this.socket.data.userInfo?.email,
-            },
+    public async getChatList() {
+        this.socket.on("chat_list", async () => {
+            const result = await prisma.user.findUnique({
+                select: {
+                    chat_list: true,
+                },
+                where: {
+                    email: this.socket.data.userInfo?.email,
+                },
+            });
+
+            if (!result || !result.chat_list)
+                return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+
+            return this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
         });
-
-        if (!newChats || !newChats.chat_list)
-            return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
-
-        this.io.to(this.socket.id).emit("respond_updated_chat_list", newChats.chat_list);
+    }
+    public async getChat() {
+        this.socket.on("chat", async () => {
+            // check if the user actually is in the group after that return the chat hmmm maybe its a good idea to keep user in the iniitialization phase add user to rooms so i we dont have too call db for checking
+            // if chat list changes update it on socket too
+        });
     }
 }
 
@@ -122,62 +125,70 @@ class HandleFriends extends BaseHelperClass {
 
     public handleAddingFriends = () => {
         this.socket.on("add_friend", async (email) => {
+            const userA = this.socket.data.userInfo?.email,
+                userB = email;
+
             // if 'email' is invalid automatically respond with false result
             if (typeof email != "string" || !email.includes("@"))
-                return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "invalid_email" });
+                return this.io.to(this.socket.id).emit("respond_add_friend", { email: userB, message: "invalid_email" });
 
-            // if the 'email' is valid but the email is same as the requester's email [cannot friend yourself]
-            if (email === this.socket.data.userInfo?.email)
-                return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "cannot_friend_yourself" });
+            /**
+            
+ * if the 'email' is valid but the email is same as the requester's email [cannot friend yourself]
+ *  */
+            if (userA === userB) return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "cannot_friend_yourself" });
 
-            const requestedToThisUser = await prisma.user.findUnique({ where: { email } });
+            const requestedUserExists = await exists(prisma.user, { where: { email: userB } });
 
-            // if 'email' is valid but the user does not exist then return false
-            if (!requestedToThisUser) return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "user_does_not_exist" });
+            /**
+             * if 'email' is valid but the user does not exist then return false
+             */
 
-            // if the users are already friends
+            if (!requestedUserExists) return this.io.to(this.socket.id).emit("respond_add_friend", { email: userB, message: "user_does_not_exist" });
+
+            /**
+             * if the users are already friends
+             */
+
             const areFriends = await prisma.user.findUnique({
-                where: { email: this.socket.data.userInfo?.email },
-                select: { friends: { where: { email: email }, select: { email: true } } },
+                where: { email: userA },
+                select: { friends: { where: { email: userB }, select: { email: true } } },
             });
 
-            if (areFriends?.friends[0]?.email === email)
-                return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "already_friends" });
+            if (areFriends?.friends[0]?.email === userB)
+                return this.io.to(this.socket.id).emit("respond_add_friend", { email: userB, message: "already_friends" });
 
             /**
              * if 'email' is valid and 'user' exists, add the user to 'friends' and add this 'user' to the other 'user' 'friends'
              */
 
-            // update the original user's friends list
-            const original = await prisma.user.update({
-                where: {
-                    email: this.socket.data.userInfo?.email,
-                },
-                data: {
-                    friends: {
-                        connect: {
-                            email: requestedToThisUser.email,
-                        },
-                    },
-                },
-                select: {
-                    email: true,
-                },
+            const handleUserA = () =>
+                prisma.user.update({
+                    where: { email: this.socket.data.userInfo?.email },
+                    data: { friends: { connect: { email: email } } },
+                    select: { email: true },
+                });
+
+            const handleUserB = () =>
+                prisma.user.update({
+                    where: { email: email },
+                    data: { friends: { connect: { email: this.socket.data.userInfo?.email } } },
+                    select: { email: true },
+                });
+
+            Promise.allSettled([handleUserA(), handleUserB()]).then(async ([resultA, resultB]) => {
+                if (resultA.status === "fulfilled") this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "success" });
+
+                if (resultA.status === "rejected") this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "failed" });
+
+                if (resultB.status === "fulfilled")
+                    //notify userB that he has a new friend !
+                    for (const socket of this.io.of("/").sockets)
+                        if (socket[1].data.userInfo?.email === email) {
+                            this.notify({ socket: socket[1], type: "New Friend", message: `${userA} added you as a friend.` });
+                            break;
+                        }
             });
-
-            // notify the other user
-            for (const socket of this.io.of("/").sockets) {
-                if (socket[1].data.userInfo?.email === email) {
-                    this.notify({ socket: socket[1], type: "New Friend", message: `${original.email} added you as a friend.` });
-                    break;
-                }
-            }
-
-            // success
-            if (original.email === this.socket.data.userInfo?.email)
-                return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "success" });
-            // else some unknown exception happened along the way
-            else return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "failed" });
         });
     };
 }

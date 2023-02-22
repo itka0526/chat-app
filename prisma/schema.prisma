@@ -21,8 +21,26 @@ model User {
   symmetricFriends User[] @relation("UserFriends")
 }
 
+// model User {  < This model is very hard to maintain because it can have duplicate rows.
+//   ...
+//   userFriends       Friends[] @relation(name: "users")
+//   friendUserFriends Friends[] @relation(name: "friend_users")
+// }
+
+// model Friends {
+//   id          Int    @id @default(autoincrement())
+//   userA_Email String
+//   userB_Email String
+
+//   userA  User    @relation(name: "users", fields: [userA_Email], references: [email])
+//   userB  User    @relation(name: "friend_users", fields: [userB_Email], references: [email])
+//   status Boolean @default(true)
+
+//   @@unique([userA_Email, userB_Email])
+// }
+
 model Chat {
-  id        Int       @id @unique @default(autoincrement())
+  id        String    @id @unique @default(uuid())
   chatName  String
   admin     String
   members   User[]
@@ -38,5 +56,5 @@ model Message {
   messenger      User     @relation(fields: [messengerEmail], references: [email])
   messengerEmail String
   chat           Chat     @relation(fields: [chatId], references: [id])
-  chatId         Int
+  chatId         String
 }
