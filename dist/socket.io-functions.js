@@ -50,7 +50,7 @@ class HandleGroups extends BaseHelperClass {
                     },
                 },
             });
-            const result = yield db_1.prisma.user.findUnique({
+            const result = yield db_1.prisma.databaseUser.findUnique({
                 select: {
                     chat_list: true,
                 },
@@ -69,7 +69,7 @@ class HandleChats extends BaseHelperClass {
         return __awaiter(this, void 0, void 0, function* () {
             this.socket.on("chat_list", () => __awaiter(this, void 0, void 0, function* () {
                 var _a;
-                const result = yield db_1.prisma.user.findUnique({
+                const result = yield db_1.prisma.databaseUser.findUnique({
                     select: {
                         chat_list: true,
                     },
@@ -83,13 +83,73 @@ class HandleChats extends BaseHelperClass {
             }));
         });
     }
+    postChat() {
+        this.socket.on("post_chat", (chatId, user, message = "") => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const userA = (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email;
+            if (!userA)
+                return this.socket.disconnect();
+            if (!chatId)
+                return;
+            const { id: messageId } = yield db_1.prisma.message.create({
+                data: {
+                    text: message,
+                    messengerEmail: userA,
+                    chatId: chatId,
+                },
+                select: { id: true },
+            });
+            const msg = {
+                messageId: messageId,
+                text: message,
+                messengerEmail: userA,
+                displayName: user.displayName,
+                profileImageURL: user.profileImageURL,
+            };
+            return this.io.to(chatId).emit("respond_live_chat", msg);
+        }));
+    }
     getChat() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.socket.on("chat", () => __awaiter(this, void 0, void 0, function* () {
-                // check if the user actually is in the group after that return the chat hmmm maybe its a good idea to keep user in the iniitialization phase add user to rooms so i we dont have too call db for checking
-                // if chat list changes update it on socket too
+        this.socket.on("get_chat", (chatId) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const result = (yield db_1.prisma.chat.findFirst({
+                where: {
+                    id: chatId,
+                    /**
+                     *  Checking if the user is allowed to read chat if not it most likely gonna return empty chat
+                     */
+                    members: { some: { email: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email } },
+                },
+                select: {
+                    messages: {
+                        select: {
+                            id: true,
+                            text: true,
+                            messengerEmail: true,
+                            messenger: { select: { displayName: true, profileImageURL: true } },
+                        },
+                        take: 10,
+                    },
+                },
+            })) || { messages: [] };
+            const formattedMessages = result.messages.map((message) => ({
+                messageId: message.id,
+                displayName: message.messenger.displayName,
+                messengerEmail: message.messengerEmail,
+                profileImageURL: message.messenger.profileImageURL,
+                text: message.text,
             }));
-        });
+            this.socket.emit("respond_get_chat", formattedMessages);
+        }));
+    }
+    kickMember() {
+        /**
+         *  The things this function must do:
+         *      - kick that socket out from SocketIO room
+         *      - remove ability to write to the chat
+         *      - remove ability to read from that chat (50%)
+         *      - update the list for that user
+         */
     }
 }
 class HandleFriends extends BaseHelperClass {
@@ -99,7 +159,7 @@ class HandleFriends extends BaseHelperClass {
             var _a;
             // handle for if the user wants list of his friends
             if (!email) {
-                const result = yield db_1.prisma.user.findUnique({
+                const result = yield db_1.prisma.databaseUser.findUnique({
                     where: { email: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email },
                     select: { friends: true },
                 });
@@ -108,7 +168,7 @@ class HandleFriends extends BaseHelperClass {
             }
             // handle for if the user wants list of someone else's friends
             if (email) {
-                const result = yield db_1.prisma.user.findUnique({
+                const result = yield db_1.prisma.databaseUser.findUnique({
                     where: { email: email },
                     select: { friends: true },
                 });
@@ -124,32 +184,31 @@ class HandleFriends extends BaseHelperClass {
                 if (typeof email != "string" || !email.includes("@"))
                     return this.io.to(this.socket.id).emit("respond_add_friend", { email: userB, message: "invalid_email" });
                 /**
-                
-     * if the 'email' is valid but the email is same as the requester's email [cannot friend yourself]
-     *  */
+                 *  if the 'email' is valid but the email is same as the requester's email [cannot friend yourself]
+                 */
                 if (userA === userB)
                     return this.io.to(this.socket.id).emit("respond_add_friend", { email: email, message: "cannot_friend_yourself" });
-                const requestedUserExists = yield (0, functions_1.exists)(db_1.prisma.user, { where: { email: userB } });
+                const requestedUserExists = yield (0, functions_1.exists)(db_1.prisma.databaseUser, { where: { email: userB } });
                 /**
-                 * if 'email' is valid but the user does not exist then return false
+                 *  if 'email' is valid but the user does not exist then return false
                  */
                 if (!requestedUserExists)
                     return this.io.to(this.socket.id).emit("respond_add_friend", { email: userB, message: "user_does_not_exist" });
                 /**
-                 * if the users are already friends
+                 *  if the users are already friends
                  */
-                const areFriends = yield db_1.prisma.user.findUnique({
+                const areFriends = yield db_1.prisma.databaseUser.findUnique({
                     where: { email: userA },
                     select: { friends: { where: { email: userB }, select: { email: true } } },
                 });
                 if (((_b = areFriends === null || areFriends === void 0 ? void 0 : areFriends.friends[0]) === null || _b === void 0 ? void 0 : _b.email) === userB)
                     return this.io.to(this.socket.id).emit("respond_add_friend", { email: userB, message: "already_friends" });
                 /**
-                 * if 'email' is valid and 'user' exists, add the user to 'friends' and add this 'user' to the other 'user' 'friends'
+                 *  if 'email' is valid and 'user' exists, add the user to 'friends' and add this 'user' to the other 'user' 'friends'
                  */
                 const handleUserA = () => {
                     var _a;
-                    return db_1.prisma.user.update({
+                    return db_1.prisma.databaseUser.update({
                         where: { email: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email },
                         data: { friends: { connect: { email: email } } },
                         select: { email: true },
@@ -157,7 +216,7 @@ class HandleFriends extends BaseHelperClass {
                 };
                 const handleUserB = () => {
                     var _a;
-                    return db_1.prisma.user.update({
+                    return db_1.prisma.databaseUser.update({
                         where: { email: email },
                         data: { friends: { connect: { email: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email } } },
                         select: { email: true },
@@ -188,7 +247,7 @@ class HandleUser extends BaseHelperClass {
             if (typeof email != "string")
                 return this.io.to(this.socket.id).emit("respond_find_users", []);
             // find all the possible users and return
-            const users = yield db_1.prisma.user.findMany({
+            const users = yield db_1.prisma.databaseUser.findMany({
                 where: {
                     email: {
                         startsWith: email,

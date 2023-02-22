@@ -5,6 +5,7 @@ import http from "http";
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData, SocketIOUser } from "./types";
 import { prisma } from "./db";
 import { ServerSocketIOFunctions, consoleObject } from "./socket.io-functions";
+import { DatabaseUser } from "@prisma/client";
 
 const app = express();
 
@@ -18,11 +19,11 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
 });
 
 app.post("/api/userChecker", async (req, res) => {
-    const userInfo = req.body;
-    const userExists = await exists(prisma.user, { where: { email: userInfo.email } });
+    const userInfo: DatabaseUser = req.body;
+    const databaseUser = await prisma.databaseUser.findUnique({ where: { email: userInfo.email } });
 
     try {
-        if (!userExists) {
+        if (!databaseUser) {
             const { displayName, email, profileImageURL } = userInfo;
 
             /**
@@ -35,7 +36,7 @@ app.post("/api/userChecker", async (req, res) => {
              *   Create the user in the database
              */
 
-            await prisma.user.create({
+            await prisma.databaseUser.create({
                 data: {
                     email: email,
                     displayName: displayName,
@@ -47,6 +48,23 @@ app.post("/api/userChecker", async (req, res) => {
             return res.status(200).send("User successfully created.");
         }
 
+        /**
+         *  Updating user info, in case, user updated his google account or something.
+         */
+
+        if (
+            databaseUser.displayName !== userInfo.displayName ||
+            databaseUser.email !== userInfo.email ||
+            databaseUser.profileImageURL !== userInfo.profileImageURL
+        ) {
+            await prisma.databaseUser.update({
+                where: { email: userInfo.email },
+                data: { email: userInfo.email, displayName: userInfo.displayName, profileImageURL: userInfo.profileImageURL },
+            });
+
+            return res.status(200).send("User already exists. User was updated. ");
+        }
+
         return res.status(200).send("User already exists.");
     } catch (err) {
         console.log(err);
@@ -56,7 +74,7 @@ app.post("/api/userChecker", async (req, res) => {
 
 io.use(async (socket, next) => {
     const userInfo = socket.handshake.auth as SocketIOUser;
-    const userExists = await exists(prisma.user, { where: { email: userInfo.email } });
+    const userExists = await exists(prisma.databaseUser, { where: { email: userInfo.email } });
 
     /**
      *  Interesting, react app is sending 2 requests and prisma is failing one of the requests
@@ -88,7 +106,7 @@ io.use(async (socket, next) => {
          *      - it would be very slow  !
          */
 
-        const result = await prisma.user.findUnique({
+        const result = await prisma.databaseUser.findUnique({
             select: {
                 chat_list: {
                     select: {
@@ -132,7 +150,9 @@ io.use(async (socket, next) => {
 io.on("connection", (socket) => {
     const { HandleChatsInstance, HandleGroupInstance, HandleFriendsInstance, HandleUserInstance } = new ServerSocketIOFunctions(io, socket);
 
+    HandleChatsInstance.getChat();
     HandleChatsInstance.getChatList();
+    HandleChatsInstance.postChat();
 
     HandleFriendsInstance.handleReturningOfListOfFriends();
     HandleFriendsInstance.handleAddingFriends();
