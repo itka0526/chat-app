@@ -7,8 +7,9 @@ import { useHandleNewGroupStates } from "../../hooks/useHandleNewGroupStates";
 import { FirstWindow } from "./LeftBarPanels/FirstWindow";
 import { SecondWindow } from "./LeftBarPanels/SecondWindow";
 import { User } from "firebase/auth";
+import { Chat } from "../../../serverTypes";
 
-export function LeftBar({ changeFocus, user }: { changeFocus: (args: changeFocusArgs) => void; user: User }) {
+export function LeftBar({ changeFocus, user, currentChat }: { changeFocus: (args: changeFocusArgs) => void; user: User; currentChat: Chat | null }) {
     const { newGroup, newGroupName, setNewGroup, setNewGroupName } = useHandleNewGroupStates();
 
     const { multiStepState, next, previous, setCount } = useMultiStep();
@@ -23,7 +24,13 @@ export function LeftBar({ changeFocus, user }: { changeFocus: (args: changeFocus
                     relative overflow-hidden
                     "
         >
-            <MainPanel changeFocus={changeFocus} nextWindow={next} previousWindow={previous} setWindowType={setWindowType} />
+            <MainPanel
+                changeFocus={changeFocus}
+                currentChat={currentChat}
+                nextWindow={next}
+                previousWindow={previous}
+                setWindowType={setWindowType}
+            />
             <MultiStep multiStepState={multiStepState} next={next} previous={previous} setCount={setCount}>
                 <FirstWindow
                     args={{ newGroup, setNewGroup }}

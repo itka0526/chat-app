@@ -1,16 +1,18 @@
-import { useContext, useEffect, useState } from "react";
-import { FocusableOptions, changeFocusArgs } from "../../../types";
+import { useContext } from "react";
+import { changeFocusArgs } from "../../../types";
 import { GoBack } from "../Shared/GoBack";
 import { TopBar } from "../Shared/TopBar";
-import { Send } from "react-feather";
-import { Chat, Message, UIMessage } from "../../../serverTypes";
+import { Chat } from "../../../serverTypes";
 import { SocketIOContext } from "../Chat";
 import { User } from "firebase/auth";
 import { useMessages } from "../../hooks/useMessages";
+import { ChatBarInput } from "./ChatBarInput";
+import { MessageItem } from "./MessageItem";
+import { LoadMore } from "./LoadMore";
 
 export function ChatBar({ changeFocus, currentChat, user }: { changeFocus: (args: changeFocusArgs) => void; currentChat: Chat | null; user: User }) {
     const socket = useContext(SocketIOContext);
-    const { input, setInput, messages, handleSubmit } = useMessages({ socket, currentChat, user });
+    const { messages, loadMore, limitReached } = useMessages({ socket, currentChat, user });
 
     return (
         <section
@@ -26,53 +28,20 @@ export function ChatBar({ changeFocus, currentChat, user }: { changeFocus: (args
             <TopBar>
                 <div className="shadow-sm h-full w-full flex items-center px-4">
                     <GoBack extraClasses="hidden max-md:block" onArrowClick={() => changeFocus({ focusTo: "sidebar", chat: null })} />
+                    <div className="px-2">
+                        <span className="text-lg font-semibold">{currentChat?.chatName}</span>
+                    </div>
                 </div>
             </TopBar>
             <div className="relative h-full w-full">
-                <div className="chat-section h-full w-full pb-20 md:pb-24 overflow-x-hidden overflow-y-auto flex flex-col-reverse ">
-                    {messages
-                        .sort((a, b) => b.messageId - a.messageId)
-                        .map((message, index) => {
-                            const show = !(index - 1 >= 0 && messages[index - 1].displayName === message.displayName);
-                            return (
-                                <div
-                                    className={`w-full px-2 md:px-16 grow-0 shrink-0 ${show ? "pt-[2px] pb-2" : "p-[2px]"}`}
-                                    key={`message-${message.messageId}-${index}`}
-                                >
-                                    <div className="grid h-full w-full grid-cols-[2.75rem,auto] gap-x-2">
-                                        {
-                                            <div className="flex items-end justify-center">
-                                                {show && <img draggable={false} src={message.profileImageURL} className="rounded-full h-11 w-11" />}
-                                            </div>
-                                        }
-                                        <div className="flex grow-0">
-                                            <div className="flex flex-col bg-white h-full p-1 px-2 rounded-lg border border-[var(--custom-grey)]">
-                                                {show && <span className="text-sm font-medium">{message.displayName}</span>}
-                                                <span>{message.text}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                <div className="chat-section h-full w-full pb-20 md:pb-24 overflow-x-hidden overflow-y-auto flex flex-col-reverse relative ">
+                    {messages.map((message, index) => {
+                        const show = !(index - 1 >= 0 && messages[index - 1].displayName === message.displayName);
+                        return <MessageItem message={message} show={show} key={`message-${message.messageId}-${index}`} />;
+                    })}
+                    {currentChat?.id && !limitReached && <LoadMore onClick={loadMore} />}
                 </div>
-                <form
-                    className="chat-input-section h-12 w-4/5 md:w-1/2 absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2"
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        handleSubmit();
-                    }}
-                >
-                    <div className="h-full rounded-md overflow-hidden border-2 border-[var(--custom-grey)] custom-shadow relative">
-                        <input
-                            className="h-full w-full outline-none pl-4"
-                            placeholder="Message"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                        ></input>
-                        <Send onClick={handleSubmit} className="absolute top-1/2 -translate-y-1/2 right-4 rotate-6 text-blue-600 cursor-pointer" />
-                    </div>
-                </form>
+                <ChatBarInput user={user} socket={socket} currentChat={currentChat} />
             </div>
         </section>
     );

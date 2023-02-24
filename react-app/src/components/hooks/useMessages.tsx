@@ -1,40 +1,70 @@
 import { useEffect, useState } from "react";
-import { Chat, SocketIOInstance, UIMessage } from "../../serverTypes";
+import { Chat, MessageLoadingOptions, SocketIOInstance, UIMessage } from "../../serverTypes";
 import { User } from "firebase/auth";
 
 export function useMessages({ socket, currentChat, user }: { socket: SocketIOInstance; currentChat: Chat | null; user: User }) {
     const [messages, setMessages] = useState<UIMessage[]>([]);
-    const [input, setInput] = useState("");
 
-    const handleSubmit = () => {
-        if (!currentChat?.id) return;
+    const [keepState, setKeepState] = useState({ skip: 0, take: 25 });
 
-        if (!user.email) {
-            socket?.disconnect();
-            return;
-        }
+    const [limitReached, setLimitReached] = useState(false);
 
-        socket?.emit(
-            "post_chat",
-            currentChat?.id,
-            { displayName: user.displayName || "anonymous", email: user.email, profileImageURL: user.photoURL || "" },
-            input
-        );
+    /**
+     *  Request 50 more messages
+     */
 
-        setInput("");
+    const loadMore = () => {
+        if (!currentChat?.id || !currentChat) return;
+
+        socket?.emit("get_chat", currentChat?.id, { skip: keepState.take, take: keepState.take + 50 }, "more");
+        setKeepState({ skip: keepState.take, take: keepState.take + 50 });
     };
 
-    // request chat
+    /**
+     *  Request initial 25 messages
+     *  Handle cleanup
+     */
+
     useEffect(() => {
         if (!currentChat?.id || !currentChat) return;
 
-        socket?.emit("get_chat", currentChat.id);
+        const initial = { skip: 0, take: 25 };
+
+        setKeepState(initial);
+        setLimitReached(false);
+        setMessages([]);
+
+        socket?.emit("get_chat", currentChat.id, initial, "initial");
     }, [currentChat]);
 
-    // get full chat
+    /**
+     *  Handle server responses
+     */
+
     useEffect(() => {
-        const listenerFull = (messages: UIMessage[]) => {
-            setMessages(messages);
+        const listenerFull = (messages: UIMessage[], type: MessageLoadingOptions) => {
+            if (type === "initial") {
+                if (messages.length < 25) {
+                    /**
+                     *  If server responded with less 25 messages that means the chat is new
+                     *  and does not require 'loadMore' functionality
+                     */
+                    setLimitReached(true);
+                }
+                setMessages(messages);
+            }
+            if (type === "more") {
+                /**
+                 *  If server responds with empty array then that means there is no more old chat,
+                 *  therefore, I should block user from clicking 'loadMore'
+                 */
+
+                if (messages.length === 0) {
+                    return setLimitReached(true);
+                }
+
+                setMessages((previousMessages) => [...previousMessages, ...messages]);
+            }
         };
 
         const listenerLive = (message: UIMessage) => {
@@ -50,5 +80,5 @@ export function useMessages({ socket, currentChat, user }: { socket: SocketIOIns
         };
     }, [currentChat]);
 
-    return { input, setInput, messages, handleSubmit };
+    return { messages, loadMore, limitReached };
 }

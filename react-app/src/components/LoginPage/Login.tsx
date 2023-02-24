@@ -7,6 +7,7 @@ const ThreeJSReactModel = lazy(() => import("./FloatingReactIcon"));
 export function Login() {
     const signInWithGoogle = async () => {
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
         await signInWithPopup(firebaseAppAuth, provider);
     };
 
@@ -30,3 +31,4 @@ export function Login() {
         </main>
     );
 }
+``;

@@ -6,7 +6,7 @@ export function AddingNewMember({ member, modify }: { member: NewGroupMember; mo
     const handleClick = () => modify(member.email, !member.added);
 
     return (
-        <div className="flex items-center hover:bg-slate-100 rounded-md px-2 cursor-pointer" onClick={handleClick}>
+        <div className="flex items-center hover:bg-slate-100 rounded-md px-2 cursor-pointer transition-colors" onClick={handleClick}>
             <CheckBox checked={member.added} />
             <UserListItem user={member} hoverEffect={false} />
         </div>

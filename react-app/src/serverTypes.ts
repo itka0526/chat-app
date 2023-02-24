@@ -30,6 +30,7 @@ export type Message = {
 export type SocketIOInstance = Socket<ServerToClientEvents, ClientToServerEvents> | null;
 
 // After this line copy from 'express-app/types.ts'
+
 export type RespondAddFriendTypes = {
     email: string;
     message: "invalid_email" | "cannot_friend_yourself" | "user_does_not_exist" | "success" | "failed" | "already_friends" | "";
@@ -39,6 +40,8 @@ export type Notification = { type: "New Friend" | "Group Update" | "Unknown Erro
 
 export type NotifyFunctionArgs = Notification & { socket: any };
 
+export type MessageLoadingOptions = "initial" | "more";
+
 export interface ServerToClientEvents {
     // only server to client events
     notify: (notification: Notification) => void;
@@ -47,7 +50,7 @@ export interface ServerToClientEvents {
     respond_add_friend: (response: RespondAddFriendTypes) => void;
     respond_find_users: (user: DatabaseUser[]) => void;
     respond_chat_list: (list: Chat[]) => void;
-    respond_get_chat: (messages: UIMessage[]) => void;
+    respond_get_chat: (messages: UIMessage[], type: MessageLoadingOptions) => void;
     respond_live_chat: (message: UIMessage) => void;
 }
 export interface ClientToServerEvents {
@@ -57,7 +60,7 @@ export interface ClientToServerEvents {
     find_users: (email: DatabaseUser["email"]) => void;
     create_group: (args: { admin: Chat["admin"]; chatName: Chat["chatName"]; members: DatabaseUser["email"][] }) => void;
     chat_list: () => void;
-    get_chat: (chatId: Chat["id"]) => void;
+    get_chat: (chatId: Chat["id"], filter: { skip: number; take: number }, type: MessageLoadingOptions) => void;
     post_chat: (chatId: Chat["id"], user: DatabaseUser, message: Message["text"]) => void;
 }
 

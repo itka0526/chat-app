@@ -12,11 +12,13 @@ export function MainPanel({
     nextWindow,
     setWindowType,
     changeFocus,
+    currentChat,
 }: SidePanelController & {
     changeFocus: (args: changeFocusArgs) => void;
+    currentChat: Chat | null;
 }) {
     const socket = useContext(SocketIOContext);
-    const { active, setActive, chatList, loading } = useChatList(socket);
+    const { chatList, loading } = useChatList(socket);
 
     return (
         <div
@@ -34,13 +36,7 @@ export function MainPanel({
                     <SkeletonChat />
                 ) : (
                     chatList.map((chat, idx) => (
-                        <ChatInfoComponent
-                            active={active}
-                            setActive={setActive}
-                            chatInfo={chat}
-                            changeFocus={changeFocus}
-                            key={`chat-${idx}-${chat.id}`}
-                        />
+                        <ChatInfoComponent currentChat={currentChat} chatInfo={chat} changeFocus={changeFocus} key={`chat-${idx}-${chat.id}`} />
                     ))
                 )}
             </ul>
@@ -50,25 +46,20 @@ export function MainPanel({
 }
 
 function ChatInfoComponent({
-    active,
-    setActive,
     chatInfo,
+    currentChat,
     changeFocus,
 }: {
-    active: string | null;
-    setActive: React.Dispatch<React.SetStateAction<string | null>>;
     chatInfo: Chat;
+    currentChat: Chat | null;
     changeFocus: (args: changeFocusArgs) => void;
 }) {
     return (
         <li
-            onClick={() => {
-                changeFocus({ focusTo: "chatbar", chat: chatInfo });
-                setActive(chatInfo.id);
-            }}
+            onClick={() => changeFocus({ focusTo: "chatbar", chat: chatInfo })}
             className={`flex items-center min-h-[3.5rem] w-full rounded-md ${
-                active === chatInfo.id ? "bg-slate-100" : "hover:bg-slate-100"
-            } cursor-pointer select-none px-2`}
+                currentChat?.id === chatInfo.id ? "bg-slate-100" : "hover:bg-slate-100"
+            } cursor-pointer select-none px-2 transition-colors`}
         >
             <div className="flex flex-col w-full whitespace-nowrap text-ellipsis overflow-hidden">
                 <span className="font-medium">{chatInfo.chatName}</span>

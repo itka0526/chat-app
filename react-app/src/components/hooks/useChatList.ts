@@ -3,7 +3,6 @@ import { Chat, SocketIOInstance } from "../../serverTypes";
 
 export const useChatList = (socket: SocketIOInstance) => {
     const [chatList, setChatList] = useState<Chat[]>([]);
-    const [active, setActive] = useState<Chat["id"] | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -23,5 +22,5 @@ export const useChatList = (socket: SocketIOInstance) => {
         };
     }, [socket]);
 
-    return { chatList, loading, active, setActive };
+    return { chatList, loading };
 };
