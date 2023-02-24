@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "start": "node express-app/express-dist/app.js",
+        "build": "npm install --prefix express-app/",
         "build_server": "npm install --prefix express-app/ && cd express-app/ && npx tsc",
         "complete_build": "npm install --prefix react-app/ && npm run build --prefix react-app/ && npm install --prefix express-app/ && cd express-app/ && npx tsc"
     },
