@@ -125,12 +125,12 @@ class HandleChats extends BaseHelperClass {
     }
 
     public getChat() {
-        this.socket.on("get_chat", async (chatId) => {
+        this.socket.on("get_chat", async (chatId, { skip, take }, type) => {
             const result = (await prisma.chat.findFirst({
                 where: {
                     id: chatId,
                     /**
-                     *  Checking if the user is allowed to read chat if not it most likely gonna return empty chat
+                     *  Checking if the user is allowed to read chat if not its gonna return empty chat
                      */
                     members: { some: { email: this.socket.data.userInfo?.email } },
                 },
@@ -143,7 +143,8 @@ class HandleChats extends BaseHelperClass {
                             messengerEmail: true,
                             messenger: { select: { displayName: true, profileImageURL: true } },
                         },
-                        take: 25,
+                        skip: skip,
+                        take: take,
                     },
                 },
             })) || { messages: [] };
@@ -156,7 +157,7 @@ class HandleChats extends BaseHelperClass {
                 text: message.text,
             }));
 
-            this.socket.emit("respond_get_chat", formattedMessages);
+            this.io.to(this.socket.id).emit("respond_get_chat", formattedMessages, type);
         });
     }
 
