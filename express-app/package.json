@@ -4,7 +4,10 @@
     "description": "server app",
     "main": "app.js",
     "scripts": {
-        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q express-dist/app.js\" "
+        "start": "node express-dist/app.js",
+        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q express-dist/app.js\" ",
+        "build_server": "npm install",
+        "complete_build": "npm install --prefix ../react-app && npm run build --prefix ../react-app && npm install"
     },
     "keywords": [],
     "author": "",
