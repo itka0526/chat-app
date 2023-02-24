@@ -10,7 +10,7 @@ export const useAddFriend = (socket: SocketIOInstance, input: string) => {
 
     /**
      *  just updating copying found users data to modified user data
-     *  'ServerUser' -> 'ModifiedUser' had to add 'message' key
+     *  'DatabaseUser' -> 'ModifiedUser' had to add 'message' key
      * */
 
     useEffect(() => {

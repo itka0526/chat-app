@@ -1,8 +1,8 @@
-import { ServerUser, SocketIOInstance } from "../../serverTypes";
+import { DatabaseUser, SocketIOInstance } from "../../serverTypes";
 import { useEffect, useState } from "react";
 
 export const useFindUsers = (socket: SocketIOInstance, input: string) => {
-    const [foundUsers, setFoundUsers] = useState<ServerUser[]>([]);
+    const [foundUsers, setFoundUsers] = useState<DatabaseUser[]>([]);
 
     // send a request once the 'email' changes
     function findUser() {
@@ -13,7 +13,7 @@ export const useFindUsers = (socket: SocketIOInstance, input: string) => {
     useEffect(() => {
         if (!socket) return;
 
-        const handleFoundUsers = (listOfUser: ServerUser[]) => {
+        const handleFoundUsers = (listOfUser: DatabaseUser[]) => {
             setFoundUsers(listOfUser);
         };
 

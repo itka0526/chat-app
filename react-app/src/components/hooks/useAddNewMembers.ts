@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NewGroupMember, PossibleArgs, SidePanelController, SidePanelState, SidePanelStateTypes } from "../../types";
-import { ServerUser } from "../../serverTypes";
+import { DatabaseUser } from "../../serverTypes";
 
 export function useAddNewMembers({
     friends,
@@ -11,7 +11,7 @@ export function useAddNewMembers({
     windowType,
     setWindowType,
 }: SidePanelController & {
-    friends: ServerUser[];
+    friends: DatabaseUser[];
     newGroup: PossibleArgs["newGroup"];
     setNewGroup: PossibleArgs["setNewGroup"];
     windowType: SidePanelStateTypes;

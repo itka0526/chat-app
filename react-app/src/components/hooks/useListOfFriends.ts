@@ -1,8 +1,8 @@
-import { ServerUser, SocketIOInstance } from "../../serverTypes";
+import { DatabaseUser, SocketIOInstance } from "../../serverTypes";
 import { useEffect, useState } from "react";
 
 export const useListOfFriends = (socket: SocketIOInstance) => {
-    const [friends, setFriends] = useState<ServerUser[]>([]);
+    const [friends, setFriends] = useState<DatabaseUser[]>([]);
 
     // request friends list
     function requestFriendList(email?: string) {
@@ -15,7 +15,7 @@ export const useListOfFriends = (socket: SocketIOInstance) => {
 
         requestFriendList();
 
-        const UpdateFriendsList = (friends: ServerUser[]) => {
+        const UpdateFriendsList = (friends: DatabaseUser[]) => {
             setFriends(friends);
         };
 

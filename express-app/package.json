@@ -4,8 +4,9 @@
     "description": "server app",
     "main": "app.js",
     "scripts": {
-        "start": "npm install && node dist/app.js",
-        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/app.js\" "
+        "start": "npm install && node express-dist/app.js",
+        "dev": "concurrently \"npx tsc --watch\" \"nodemon -q express-dist/app.js\" ",
+        "build": "npm install --prefix ../react-app && npm run build --prefix ../react-app && npm run start"
     },
     "keywords": [],
     "author": "",
