@@ -22,7 +22,7 @@ const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 4000;
 app.use(express_1.default.json());
-app.use(express_1.default.static(path_1.default.join(path_1.default.join(process.cwd(), "/react-dist"))));
+app.use(express_1.default.static(path_1.default.join(process.cwd(), "/react-dist")));
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, {
     path: "/api/socket",

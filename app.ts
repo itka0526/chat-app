@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
-app.use(express.static(path.join(path.join(process.cwd(), "/react-dist"))));
+app.use(express.static(path.join(process.cwd(), "/react-dist")));
 
 const server = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server, {
