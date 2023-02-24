@@ -5,7 +5,7 @@ import { writeFile } from "fs/promises";
 import { exists } from "./functions";
 import { Message, DatabaseUser } from "@prisma/client";
 
-export const consoleObject = async (args: any) => await writeFile("../results.json", JSON.stringify([...args], null, 2));
+export const consoleObject = async (...args: any) => await writeFile("../results.json", JSON.stringify([...args], null, 2));
 
 class BaseHelperClass {
     public io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
@@ -136,13 +136,14 @@ class HandleChats extends BaseHelperClass {
                 },
                 select: {
                     messages: {
+                        orderBy: { id: "desc" },
                         select: {
                             id: true,
                             text: true,
                             messengerEmail: true,
                             messenger: { select: { displayName: true, profileImageURL: true } },
                         },
-                        take: 10,
+                        take: 25,
                     },
                 },
             })) || { messages: [] };

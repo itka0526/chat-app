@@ -11,7 +11,6 @@ import { useMessages } from "../../hooks/useMessages";
 export function ChatBar({ changeFocus, currentChat, user }: { changeFocus: (args: changeFocusArgs) => void; currentChat: Chat | null; user: User }) {
     const socket = useContext(SocketIOContext);
     const { input, setInput, messages, handleSubmit } = useMessages({ socket, currentChat, user });
-    console.log(messages);
 
     return (
         <section
@@ -30,23 +29,32 @@ export function ChatBar({ changeFocus, currentChat, user }: { changeFocus: (args
                 </div>
             </TopBar>
             <div className="relative h-full w-full">
-                <div className="chat-section h-full w-full pb-20 md:pb-24 overflow-x-hidden overflow-y-auto flex flex-col-reverse gap-2">
+                <div className="chat-section h-full w-full pb-20 md:pb-24 overflow-x-hidden overflow-y-auto flex flex-col-reverse ">
                     {messages
                         .sort((a, b) => b.messageId - a.messageId)
-                        .map((message, index) => (
-                            <div className=" w-full bg-red-200 grow-0 shrink-0 px-4 py-2" key={`message-${message.messageId}-${index}`}>
-                                <div className="flex flex-col bg-white">
-                                    {index - 1 >= 0 && messages[index - 1].displayName === message.displayName ? (
-                                        <></>
-                                    ) : (
-                                        <span>{message.displayName}</span>
-                                    )}
-                                    <div>
-                                        <span>{message.text}</span>
+                        .map((message, index) => {
+                            const show = !(index - 1 >= 0 && messages[index - 1].displayName === message.displayName);
+                            return (
+                                <div
+                                    className={`w-full px-2 md:px-16 grow-0 shrink-0 ${show ? "pt-[2px] pb-2" : "p-[2px]"}`}
+                                    key={`message-${message.messageId}-${index}`}
+                                >
+                                    <div className="grid h-full w-full grid-cols-[2.75rem,auto] gap-x-2">
+                                        {
+                                            <div className="flex items-end justify-center">
+                                                {show && <img draggable={false} src={message.profileImageURL} className="rounded-full h-11 w-11" />}
+                                            </div>
+                                        }
+                                        <div className="flex grow-0">
+                                            <div className="flex flex-col bg-white h-full p-1 px-2 rounded-lg border border-[var(--custom-grey)]">
+                                                {show && <span className="text-sm font-medium">{message.displayName}</span>}
+                                                <span>{message.text}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                 </div>
                 <form
                     className="chat-input-section h-12 w-4/5 md:w-1/2 absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2"

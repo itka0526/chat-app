@@ -1,11 +1,11 @@
 import { PropsWithChildren } from "react";
-import { ServerUser } from "../../../serverTypes";
+import { DatabaseUser } from "../../../serverTypes";
 
 export function UserListItem({
     children,
     user: { email, displayName, profileImageURL },
     hoverEffect = true,
-}: PropsWithChildren & { user: ServerUser; hoverEffect?: boolean }) {
+}: PropsWithChildren & { user: DatabaseUser; hoverEffect?: boolean }) {
     return (
         <li className={`flex items-center h-14 w-full rounded-md ${hoverEffect ? "hover:bg-slate-100" : ""} cursor-pointer select-none`}>
             <img draggable={false} src={profileImageURL} className="rounded-full h-11 w-11 ml-2 mr-3" />
