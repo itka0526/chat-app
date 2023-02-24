@@ -68,7 +68,7 @@ export function useMessages({ socket, currentChat, user }: { socket: SocketIOIns
         };
 
         const listenerLive = (message: UIMessage) => {
-            setMessages((prevMessages) => [...prevMessages, message]);
+            setMessages((prevMessages) => [message, ...prevMessages]);
         };
 
         socket?.on("respond_get_chat", listenerFull);
