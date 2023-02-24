@@ -6,12 +6,14 @@ import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketDa
 import { prisma } from "./db";
 import { ServerSocketIOFunctions, consoleObject } from "./socket.io-functions";
 import { DatabaseUser } from "@prisma/client";
+import path from "path";
 
 const app = express();
 
 const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
+app.use(express.static(path.join(path.join(process.cwd(), "/react-dist"))));
 
 const server = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server, {
