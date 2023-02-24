@@ -13,7 +13,7 @@ exports.ServerSocketIOFunctions = exports.consoleObject = void 0;
 const db_1 = require("./db");
 const promises_1 = require("fs/promises");
 const functions_1 = require("./functions");
-const consoleObject = (args) => __awaiter(void 0, void 0, void 0, function* () { return yield (0, promises_1.writeFile)("../results.json", JSON.stringify([...args], null, 2)); });
+const consoleObject = (...args) => __awaiter(void 0, void 0, void 0, function* () { return yield (0, promises_1.writeFile)("../results.json", JSON.stringify([...args], null, 2)); });
 exports.consoleObject = consoleObject;
 class BaseHelperClass {
     constructor(io, socket) {
@@ -122,13 +122,14 @@ class HandleChats extends BaseHelperClass {
                 },
                 select: {
                     messages: {
+                        orderBy: { id: "desc" },
                         select: {
                             id: true,
                             text: true,
                             messengerEmail: true,
                             messenger: { select: { displayName: true, profileImageURL: true } },
                         },
-                        take: 10,
+                        take: 25,
                     },
                 },
             })) || { messages: [] };
