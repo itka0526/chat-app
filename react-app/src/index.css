@@ -4,6 +4,8 @@
 
 * {
     /* outline: 1px solid green; */
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    -webkit-tap-highlight-color: transparent;
 }
 
 :root {
@@ -40,10 +42,6 @@
 }
 
 .main-panel-search-bar > svg {
-    color: rgb(226 232 240 / 1);
-}
-
-.main-panel-search-bar:hover > svg {
     color: rgb(203 213 225 / 1);
 }
 

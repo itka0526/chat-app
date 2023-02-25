@@ -8,5 +8,5 @@ export function useMultiStep() {
     const next = () => multiStepState[1]((prev) => (prev + 1 <= count ? prev + 1 : prev));
     const previous = () => multiStepState[1]((prev) => (prev >= 1 ? prev - 1 : prev));
 
-    return { multiStepState, previous, next, setCount } as useMultiStepReturn;
+    return { multiStepState, previous, next, count, setCount } as useMultiStepReturn;
 }

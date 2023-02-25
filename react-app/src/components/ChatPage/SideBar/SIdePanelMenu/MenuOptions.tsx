@@ -37,7 +37,7 @@ const MenuOption = ({
 }) => {
     return (
         <li
-            className="hover:brightness-75 transition-[filter] bg-white rounded-md py-1 flex items-center cursor-pointer"
+            className="hover:brightness-90 transition-[filter] bg-white rounded-md py-1 flex items-center cursor-pointer"
             onClick={() => {
                 setWindowType && setWindowType(type);
                 nextWindow && nextWindow();

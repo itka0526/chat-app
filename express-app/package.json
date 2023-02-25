@@ -7,7 +7,7 @@
         "start": "node express-dist/app.js",
         "dev": "concurrently \"npx tsc --watch\" \"nodemon -q express-dist/app.js\" ",
         "build_server": "npm install",
-        "complete_build": "npm install --prefix ../react-app && npm run build --prefix ../react-app && npm install && npx tsc"
+        "complete_build": "npm install --prefix ../react-app && npm run build --prefix ../react-app && echo '***** SUCCESSFULLY BUILT REACT APP *****' && npm install && npx tsc && echo '***** SUCCESSFULLY BUILT EXPRESS APP *****' "
     },
     "keywords": [],
     "author": "",

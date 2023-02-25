@@ -1,14 +1,29 @@
 import { X } from "react-feather";
 import { NewGroupMember } from "../../../../../types";
 
-export function ManageNewMembers({ members, modify }: { members: NewGroupMember[]; modify: (email: string, value: boolean) => void }) {
+export function ManageNewMembers({
+    rawInput,
+    members,
+    handleChange,
+    modify,
+}: {
+    rawInput: string;
+    members: NewGroupMember[];
+    handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    modify: (email: string, value: boolean) => void;
+}) {
     return (
         <div className="flex flex-wrap px-4 bg-white gap-1 my-[-1px] ">
             {members.map(
                 (member) => member.added === true && <ManageNewMember modify={modify} member={member} key={`manage-member-item-${member.email}`} />
             )}
             <div className="min-w-[200px] grow pt-1 pb-2 h-11">
-                <input placeholder="Add friends..." className=" focus:outline-none w-full h-full px-2"></input>
+                <input
+                    value={rawInput}
+                    onChange={handleChange}
+                    placeholder="Add friends..."
+                    className=" focus:outline-none w-full h-full px-2"
+                ></input>
             </div>
         </div>
     );

@@ -7,6 +7,7 @@ import { useChatList } from "../../hooks/useChatList";
 import { Chat } from "../../../serverTypes";
 import { MainPanelSearchBar } from "./MainPanelCompoenents/MainPanelSearchBar";
 import { SkeletonChat } from "../Shared/SidePanel/SkeletonChat";
+import { useSortMainPanel } from "../../hooks/useSort";
 
 export function MainPanel({
     nextWindow,
@@ -18,7 +19,12 @@ export function MainPanel({
     currentChat: Chat | null;
 }) {
     const socket = useContext(SocketIOContext);
+
     const { chatList, loading } = useChatList(socket);
+
+    const { filteredData, rawInput, handleChange } = useSortMainPanel(500, chatList);
+
+    filteredData;
 
     return (
         <div
@@ -29,13 +35,13 @@ export function MainPanel({
             `}
         >
             <TopBar>
-                <MainPanelSearchBar />
+                <MainPanelSearchBar rawInput={rawInput} handleChange={handleChange} />
             </TopBar>
             <ul className="flex flex-col overflow-y-auto select-none p-2 pt-0 ">
                 {loading ? (
                     <SkeletonChat />
                 ) : (
-                    chatList.map((chat, idx) => (
+                    filteredData.map((chat, idx) => (
                         <ChatInfoComponent currentChat={currentChat} chatInfo={chat} changeFocus={changeFocus} key={`chat-${idx}-${chat.id}`} />
                     ))
                 )}
