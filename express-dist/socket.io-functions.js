@@ -60,6 +60,8 @@ class HandleGroups extends BaseHelperClass {
             });
             if (!result || !result.chat_list)
                 return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+            const chatIdList = result.chat_list.map((chat) => chat.id);
+            this.socket.join(chatIdList);
             this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
         }));
     }
