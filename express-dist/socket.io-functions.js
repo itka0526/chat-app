@@ -37,7 +37,7 @@ exports.ServerSocketIOFunctions = ServerSocketIOFunctions;
 class HandleGroups extends BaseHelperClass {
     CreateAndReturnUpdatedList() {
         this.socket.on("create_group", ({ admin, chatName, members }) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            var _a, _b, _c;
             if (!admin || !chatName || !members)
                 return this.io.to(this.socket.id).emit("notify", { message: "Failed to create group.", type: "Unknown Error" });
             // create chat with 'group'
@@ -63,6 +63,30 @@ class HandleGroups extends BaseHelperClass {
             const chatIdList = result.chat_list.map((chat) => chat.id);
             this.socket.join(chatIdList);
             this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
+            /**
+             * if there are online users who are connected to the server update their list too
+             */
+            for (const socket of this.io.of("/").sockets) {
+                if (((_b = socket[1].data.userInfo) === null || _b === void 0 ? void 0 : _b.email) && members.includes((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email)) {
+                    db_1.prisma.databaseUser.findUnique({ select: { chat_list: true }, where: { email: socket[1].data.userInfo.email } }).then((successfulResult) => {
+                        if (successfulResult === null || successfulResult === void 0 ? void 0 : successfulResult.chat_list) {
+                            const chatIdList = result.chat_list.map((chat) => chat.id);
+                            socket[1].join(chatIdList);
+                            return this.io.to(socket[1].id).emit("respond_chat_list", successfulResult === null || successfulResult === void 0 ? void 0 : successfulResult.chat_list);
+                        }
+                        else {
+                            return this.io
+                                .to(this.socket.id)
+                                .emit("notify", { type: "Unknown Error", message: "Could not properly update chat list. Please reload." });
+                        }
+                    }, () => {
+                        return this.io.to(this.socket.id).emit("notify", {
+                            type: "Unknown Error",
+                            message: "Failed to find user in database. Could not properly update chat list. Please reload.",
+                        });
+                    });
+                }
+            }
         }));
     }
 }

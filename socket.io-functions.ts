@@ -75,6 +75,34 @@ class HandleGroups extends BaseHelperClass {
             const chatIdList = result.chat_list.map((chat) => chat.id);
             this.socket.join(chatIdList);
             this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
+
+            /**
+             * if there are online users who are connected to the server update their list too
+             */
+
+            for (const socket of this.io.of("/").sockets) {
+                if (socket[1].data.userInfo?.email && members.includes(socket[1].data.userInfo?.email)) {
+                    prisma.databaseUser.findUnique({ select: { chat_list: true }, where: { email: socket[1].data.userInfo.email } }).then(
+                        (successfulResult) => {
+                            if (successfulResult?.chat_list) {
+                                const chatIdList = result.chat_list.map((chat) => chat.id);
+                                socket[1].join(chatIdList);
+                                return this.io.to(socket[1].id).emit("respond_chat_list", successfulResult?.chat_list);
+                            } else {
+                                return this.io
+                                    .to(this.socket.id)
+                                    .emit("notify", { type: "Unknown Error", message: "Could not properly update chat list. Please reload." });
+                            }
+                        },
+                        () => {
+                            return this.io.to(this.socket.id).emit("notify", {
+                                type: "Unknown Error",
+                                message: "Failed to find user in database. Could not properly update chat list. Please reload.",
+                            });
+                        }
+                    );
+                }
+            }
         });
     }
 }
