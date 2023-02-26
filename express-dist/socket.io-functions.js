@@ -89,6 +89,101 @@ class HandleGroups extends BaseHelperClass {
             }
         }));
     }
+    HandleReturnMembers() {
+        this.socket.on("get_members", (chatId) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const result = yield db_1.prisma.chat.findFirst({
+                where: {
+                    id: chatId,
+                    /**
+                     *  Checking if the user is allowed to read chat if not its gonna return empty chat
+                     */
+                    members: { some: { email: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email } },
+                },
+                select: {
+                    members: true,
+                },
+            });
+            if (!(result === null || result === void 0 ? void 0 : result.members))
+                return this.io
+                    .to(this.socket.id)
+                    .emit("notify", { type: "Unknown Error", message: `Database failed to retreive members of '${chatId}' group.` });
+            return this.io.to(this.socket.id).emit("respond_get_members", result.members);
+        }));
+    }
+    HandleKickMember() {
+        /**
+         *  The things this function must do:
+         *      - kick that socket out from SocketIO room 100%
+         *      - remove ability to write to the chat ?
+         *      - remove ability to read from that chat 100%
+         *      - update the list for that user and for other users 100%
+         */
+        this.socket.on("kick_member", (email, chatId) => __awaiter(this, void 0, void 0, function* () {
+            /**
+             *  Check if the user has enough privileges to kick a member from a chat
+             */
+            var _a, _b, _c, _d;
+            const privileged = Boolean(yield db_1.prisma.chat.findFirst({
+                where: {
+                    id: chatId,
+                    admin: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email,
+                },
+                select: { id: true },
+            }));
+            /**
+             *  If somehow user managed to find the kick button and sent a request notify the user that he does not have enough privileges.
+             */
+            if (!privileged)
+                return this.io
+                    .to(this.socket.id)
+                    .emit("notify", { type: "Unknown Error", message: `User does not have enough privileges to kick ${email}.` });
+            /**
+             *  If privileged then delete that the user with 'email' from the group
+             */
+            if (privileged) {
+                /**
+                 *  If user is trying to remove himself notify that you cannot remove yourself
+                 */
+                if (((_b = this.socket.data.userInfo) === null || _b === void 0 ? void 0 : _b.email) === email) {
+                    return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "You cannot remove yourself." });
+                }
+                /**
+                 *  If somehow email is invalid email return notification
+                 */
+                if (!email.includes("@"))
+                    this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Invalid email was given." });
+                const membersResult = yield db_1.prisma.chat.update({
+                    where: { id: chatId },
+                    data: { members: { disconnect: { email: email } } },
+                    select: { members: true },
+                });
+                /**
+                 *  If members's list is false then something went wrong with the database
+                 */
+                if (!membersResult)
+                    return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Could not update member's list." });
+                for (const socket of this.io.of("/").sockets) {
+                    /**
+                     *  ~ Leave the live room
+                     *  ~ Return the updated list
+                     */
+                    if (((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email) === email) {
+                        socket[1].leave(chatId);
+                        const result = yield db_1.prisma.databaseUser.findUnique({
+                            select: { chat_list: true },
+                            where: { email: (_d = this.socket.data.userInfo) === null || _d === void 0 ? void 0 : _d.email },
+                        });
+                        if (!result || !result.chat_list)
+                            this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+                        else if (result && result.chat_list)
+                            this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
+                    }
+                }
+                return this.io.to(chatId).emit("respond_get_members", membersResult.members);
+            }
+        }));
+    }
 }
 class HandleChats extends BaseHelperClass {
     getChatList() {
@@ -169,15 +264,6 @@ class HandleChats extends BaseHelperClass {
             }));
             this.io.to(this.socket.id).emit("respond_get_chat", formattedMessages, type);
         }));
-    }
-    kickMember() {
-        /**
-         *  The things this function must do:
-         *      - kick that socket out from SocketIO room
-         *      - remove ability to write to the chat
-         *      - remove ability to read from that chat (50%)
-         *      - update the list for that user
-         */
     }
 }
 class HandleFriends extends BaseHelperClass {
@@ -261,7 +347,6 @@ class HandleFriends extends BaseHelperClass {
                         for (const socket of this.io.of("/").sockets)
                             if (((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email) === email) {
                                 this.notify({ socket: socket[1], type: "New Friend", message: `${userA} added you as a friend.` });
-                                break;
                             }
                 }));
             }));

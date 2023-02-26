@@ -32,6 +32,7 @@ export interface ServerToClientEvents {
     respond_chat_list: (list: Chat[]) => void;
     respond_get_chat: (messages: UIMessage[], type: MessageLoadingOptions) => void;
     respond_live_chat: (message: UIMessage) => void;
+    respond_get_members: (updatedMembers: DatabaseUser[]) => void;
 }
 export interface ClientToServerEvents {
     // can be empty if empty will default to own friends
@@ -42,6 +43,8 @@ export interface ClientToServerEvents {
     chat_list: () => void;
     get_chat: (chatId: Chat["id"], filter: { skip: number; take: number }, type: MessageLoadingOptions) => void;
     post_chat: (chatId: Chat["id"], user: DatabaseUser, message: Message["text"]) => void;
+    get_members: (chatId: Chat["id"]) => void;
+    kick_member: (email: DatabaseUser["email"], chatId: Chat["id"]) => void;
 }
 
 export interface InterServerEvents {
