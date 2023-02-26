@@ -119,11 +119,11 @@ class HandleGroups extends BaseHelperClass {
          *      - remove ability to read from that chat 100%
          *      - update the list for that user and for other users 100%
          */
-        this.socket.on("kick_member", (email, chatId) => __awaiter(this, void 0, void 0, function* () {
+        this.socket.on("kick_member", (kickMemberEmail, chatId) => __awaiter(this, void 0, void 0, function* () {
             /**
              *  Check if the user has enough privileges to kick a member from a chat
              */
-            var _a, _b, _c, _d;
+            var _a, _b, _c;
             const privileged = Boolean(yield db_1.prisma.chat.findFirst({
                 where: {
                     id: chatId,
@@ -137,7 +137,7 @@ class HandleGroups extends BaseHelperClass {
             if (!privileged)
                 return this.io
                     .to(this.socket.id)
-                    .emit("notify", { type: "Unknown Error", message: `User does not have enough privileges to kick ${email}.` });
+                    .emit("notify", { type: "Unknown Error", message: `User does not have enough privileges to kick ${kickMemberEmail}.` });
             /**
              *  If privileged then delete that the user with 'email' from the group
              */
@@ -145,17 +145,17 @@ class HandleGroups extends BaseHelperClass {
                 /**
                  *  If user is trying to remove himself notify that you cannot remove yourself
                  */
-                if (((_b = this.socket.data.userInfo) === null || _b === void 0 ? void 0 : _b.email) === email) {
+                if (((_b = this.socket.data.userInfo) === null || _b === void 0 ? void 0 : _b.email) === kickMemberEmail) {
                     return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "You cannot remove yourself." });
                 }
                 /**
                  *  If somehow email is invalid email return notification
                  */
-                if (!email.includes("@"))
+                if (!kickMemberEmail.includes("@"))
                     this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Invalid email was given." });
                 const membersResult = yield db_1.prisma.chat.update({
                     where: { id: chatId },
-                    data: { members: { disconnect: { email: email } } },
+                    data: { members: { disconnect: { email: kickMemberEmail } } },
                     select: { members: true },
                 });
                 /**
@@ -165,19 +165,21 @@ class HandleGroups extends BaseHelperClass {
                     return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Could not update member's list." });
                 for (const socket of this.io.of("/").sockets) {
                     /**
-                     *  ~ Leave the live room
-                     *  ~ Return the updated list
+                     *  ~ Kicked member should leave the live room
+                     *  ~ Kicked member should get its the updated list
                      */
-                    if (((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email) === email) {
+                    if (((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email) === kickMemberEmail) {
                         socket[1].leave(chatId);
                         const result = yield db_1.prisma.databaseUser.findUnique({
                             select: { chat_list: true },
-                            where: { email: (_d = this.socket.data.userInfo) === null || _d === void 0 ? void 0 : _d.email },
+                            where: { email: socket[1].data.userInfo.email },
                         });
-                        if (!result || !result.chat_list)
-                            this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
-                        else if (result && result.chat_list)
-                            this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
+                        if (!(result === null || result === void 0 ? void 0 : result.chat_list)) {
+                            this.io.to(socket[1].id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+                        }
+                        else if (result === null || result === void 0 ? void 0 : result.chat_list) {
+                            this.io.to(socket[1].id).emit("respond_chat_list", result.chat_list);
+                        }
                     }
                 }
                 return this.io.to(chatId).emit("respond_get_members", membersResult.members);

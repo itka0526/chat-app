@@ -139,7 +139,7 @@ class HandleGroups extends BaseHelperClass {
          *      - update the list for that user and for other users 100%
          */
 
-        this.socket.on("kick_member", async (email, chatId) => {
+        this.socket.on("kick_member", async (kickMemberEmail, chatId) => {
             /**
              *  Check if the user has enough privileges to kick a member from a chat
              */
@@ -161,7 +161,7 @@ class HandleGroups extends BaseHelperClass {
             if (!privileged)
                 return this.io
                     .to(this.socket.id)
-                    .emit("notify", { type: "Unknown Error", message: `User does not have enough privileges to kick ${email}.` });
+                    .emit("notify", { type: "Unknown Error", message: `User does not have enough privileges to kick ${kickMemberEmail}.` });
 
             /**
              *  If privileged then delete that the user with 'email' from the group
@@ -171,18 +171,19 @@ class HandleGroups extends BaseHelperClass {
                 /**
                  *  If user is trying to remove himself notify that you cannot remove yourself
                  */
-                if (this.socket.data.userInfo?.email === email) {
+                if (this.socket.data.userInfo?.email === kickMemberEmail) {
                     return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "You cannot remove yourself." });
                 }
 
                 /**
                  *  If somehow email is invalid email return notification
                  */
-                if (!email.includes("@")) this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Invalid email was given." });
+                if (!kickMemberEmail.includes("@"))
+                    this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Invalid email was given." });
 
                 const membersResult = await prisma.chat.update({
                     where: { id: chatId },
-                    data: { members: { disconnect: { email: email } } },
+                    data: { members: { disconnect: { email: kickMemberEmail } } },
                     select: { members: true },
                 });
 
@@ -194,20 +195,22 @@ class HandleGroups extends BaseHelperClass {
 
                 for (const socket of this.io.of("/").sockets) {
                     /**
-                     *  ~ Leave the live room
-                     *  ~ Return the updated list
+                     *  ~ Kicked member should leave the live room
+                     *  ~ Kicked member should get its the updated list
                      */
-                    if (socket[1].data.userInfo?.email === email) {
+                    if (socket[1].data.userInfo?.email === kickMemberEmail) {
                         socket[1].leave(chatId);
 
                         const result = await prisma.databaseUser.findUnique({
                             select: { chat_list: true },
-                            where: { email: this.socket.data.userInfo?.email },
+                            where: { email: socket[1].data.userInfo.email },
                         });
 
-                        if (!result || !result.chat_list)
-                            this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
-                        else if (result && result.chat_list) this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
+                        if (!result?.chat_list) {
+                            this.io.to(socket[1].id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+                        } else if (result?.chat_list) {
+                            this.io.to(socket[1].id).emit("respond_chat_list", result.chat_list);
+                        }
                     }
                 }
                 return this.io.to(chatId).emit("respond_get_members", membersResult.members);
