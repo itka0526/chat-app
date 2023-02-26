@@ -1,5 +1,4 @@
 import { ArrowLeft } from "react-feather";
-import { FocusableOptions, changeFocusArgs } from "../../../types";
 
 export function GoBack({
     extraClasses = "",
@@ -7,12 +6,12 @@ export function GoBack({
     onArrowClickArgs,
 }: {
     extraClasses?: string;
-    onArrowClickArgs?: changeFocusArgs | any;
-    onArrowClick: (args: changeFocusArgs) => void | any;
+    onArrowClickArgs?: any;
+    onArrowClick: (args: any) => void | any;
 }) {
     return (
         <div onClick={() => onArrowClick(onArrowClickArgs)} className={`hover:cursor-pointer ${extraClasses}`}>
-            <ArrowLeft />
+            <ArrowLeft height={28} width={28} />
         </div>
     );
 }

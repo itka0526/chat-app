@@ -3,7 +3,9 @@ import { useState } from "react";
 import { Chat, SocketIOInstance } from "../../../serverTypes";
 import { Send } from "react-feather";
 
-export function ChatBarInput({ user, socket, currentChat }: { user: User; socket: SocketIOInstance; currentChat: Chat | null }) {
+type CharBarInputProps = { shrink: boolean; user: User; socket: SocketIOInstance; currentChat: Chat | null };
+
+export function ChatBarInput({ shrink, user, socket, currentChat }: CharBarInputProps) {
     const [input, setInput] = useState("");
 
     const handleSubmit = () => {
@@ -25,9 +27,15 @@ export function ChatBarInput({ user, socket, currentChat }: { user: User; socket
     };
     return (
         <form
-            className={`chat-input-section h-12 w-4/5 md:w-1/2 absolute bottom-5 md:bottom-8 left-1/2 -translate-x-1/2 transition-transform ${
-                currentChat?.id ? "" : "translate-y-28"
-            }`}
+            className={`
+                chat-input-section h-12 w-4/5 md:w-1/2
+                absolute bottom-5 md:bottom-8
+                transition-transform 
+                left-0 right-0 ml-auto mr-auto 
+
+                ${currentChat?.id ? "" : "translate-y-28"}
+                ${shrink ? "md:-translate-x-[12.5vw]" : ""}
+                `}
             onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit();
@@ -40,7 +48,12 @@ export function ChatBarInput({ user, socket, currentChat }: { user: User; socket
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                 ></input>
-                <Send onClick={handleSubmit} className="absolute top-1/2 -translate-y-1/2 right-4 rotate-6 text-blue-600 cursor-pointer" />
+                <Send
+                    onClick={handleSubmit}
+                    className="absolute  top-1/2 -translate-y-1/2 right-4 rotate-6 text-blue-600 cursor-pointer"
+                    height={24}
+                    width={24}
+                />
             </div>
         </form>
     );

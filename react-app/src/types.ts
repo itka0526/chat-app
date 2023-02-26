@@ -23,7 +23,7 @@ export type useMultiStepReturn = {
     setCount: React.Dispatch<React.SetStateAction<number>>;
 };
 
-export type FocusableOptions = "sidebar" | "chatbar";
+export type FocusableOptions = { focusTo: "leftbar" | "chatbar" | "rightbar" };
 
 export type SidePanelStateTypes = "new_group" | "new_friend" | "new_group_2" | "";
 
@@ -40,4 +40,16 @@ export type ModifiedUser = DatabaseUser & RespondAddFriendTypes;
 
 export type NewGroupMember = DatabaseUser & { added: boolean };
 
-export type changeFocusArgs = { focusTo: FocusableOptions; chat: Chat | null };
+export type useChat = [currentChat: Chat | null, setCurrentChat: React.Dispatch<React.SetStateAction<Chat | null>>];
+
+/**
+ *  if 1, 2, 3 are all 0% that means first panel is visible
+ *  if 1, 2 are -100% and third is not change then that means second panel is visible
+ *  if 1, 2, 3 are -200% then third panel is visible
+ */
+
+export type PossiblePanelStates = {
+    first: "0%" | "-100%" | "-200%";
+    second: "0%" | "-100%" | "-200%";
+    third: "0%" | "-200%";
+};

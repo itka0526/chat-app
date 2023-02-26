@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { SidePanelController, changeFocusArgs } from "../../../types";
+import { FocusableOptions, SidePanelController, useChat } from "../../../types";
 import { SidePanelMenu } from "./SIdePanelMenu/SidePanelMenu";
 import { TopBar } from "../Shared/TopBar";
 import { SocketIOContext } from "../Chat";
@@ -9,22 +9,17 @@ import { MainPanelSearchBar } from "./MainPanelCompoenents/MainPanelSearchBar";
 import { SkeletonChat } from "../Shared/SidePanel/SkeletonChat";
 import { useSortMainPanel } from "../../hooks/useSort";
 
-export function MainPanel({
-    nextWindow,
-    setWindowType,
-    changeFocus,
-    currentChat,
-}: SidePanelController & {
-    changeFocus: (args: changeFocusArgs) => void;
-    currentChat: Chat | null;
-}) {
+type MainPanelProps = SidePanelController & {
+    changeFocus: ({ focusTo }: FocusableOptions) => void;
+    useChat: useChat;
+};
+
+export function MainPanel({ nextWindow, setWindowType, changeFocus, useChat }: MainPanelProps) {
     const socket = useContext(SocketIOContext);
 
     const { chatList, loading } = useChatList(socket);
 
     const { filteredData, rawInput, handleChange } = useSortMainPanel(500, chatList);
-
-    filteredData;
 
     return (
         <div
@@ -42,7 +37,7 @@ export function MainPanel({
                     <SkeletonChat />
                 ) : (
                     filteredData.map((chat, idx) => (
-                        <ChatInfoComponent currentChat={currentChat} chatInfo={chat} changeFocus={changeFocus} key={`chat-${idx}-${chat.id}`} />
+                        <ChatInfoComponent useChat={useChat} chatInfo={chat} changeFocus={changeFocus} key={`chat-${idx}-${chat.id}`} />
                     ))
                 )}
             </ul>
@@ -51,20 +46,21 @@ export function MainPanel({
     );
 }
 
-function ChatInfoComponent({
-    chatInfo,
-    currentChat,
-    changeFocus,
-}: {
+type ChatInfoComponentProps = {
     chatInfo: Chat;
-    currentChat: Chat | null;
-    changeFocus: (args: changeFocusArgs) => void;
-}) {
+    changeFocus: ({ focusTo }: FocusableOptions) => void;
+    useChat: useChat;
+};
+
+function ChatInfoComponent({ chatInfo, changeFocus, useChat: [currentChat, setCurrentChat] }: ChatInfoComponentProps) {
     return (
         <li
-            onClick={() => changeFocus({ focusTo: "chatbar", chat: chatInfo })}
+            onClick={() => {
+                changeFocus({ focusTo: "chatbar" });
+                setCurrentChat(chatInfo);
+            }}
             className={`flex items-center min-h-[3.5rem] w-full rounded-md ${
-                currentChat?.id === chatInfo.id ? "bg-slate-100" : "hover:bg-slate-100"
+                currentChat?.id === chatInfo.id ? "bg-gray-100" : "hover:bg-gray-100"
             } cursor-pointer select-none px-2 transition-colors`}
         >
             <div className="flex flex-col w-full whitespace-nowrap text-ellipsis overflow-hidden">

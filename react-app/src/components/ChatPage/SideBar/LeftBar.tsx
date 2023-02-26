@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FocusableOptions, SidePanelStateTypes, changeFocusArgs } from "../../../types";
+import { FocusableOptions, PossiblePanelStates, SidePanelStateTypes, useChat } from "../../../types";
 import { MainPanel } from "./MainPanel";
 import { MultiStep } from "../Shared/MultiStep/MultiStep";
 import { useMultiStep } from "../../hooks/useMultiStep";
@@ -9,7 +9,14 @@ import { SecondWindow } from "./LeftBarPanels/SecondWindow";
 import { User } from "firebase/auth";
 import { Chat } from "../../../serverTypes";
 
-export function LeftBar({ changeFocus, user, currentChat }: { changeFocus: (args: changeFocusArgs) => void; user: User; currentChat: Chat | null }) {
+type LeftBarProps = {
+    user: User;
+    useChat: useChat;
+    panelStates: PossiblePanelStates;
+    changeFocus: ({ focusTo }: FocusableOptions) => void;
+};
+
+export function LeftBar({ panelStates, changeFocus, user, useChat }: LeftBarProps) {
     const { newGroup, newGroupName, setNewGroup, setNewGroupName } = useHandleNewGroupStates();
 
     const { multiStepState, next, previous, setCount } = useMultiStep();
@@ -18,19 +25,21 @@ export function LeftBar({ changeFocus, user, currentChat }: { changeFocus: (args
 
     return (
         <section
-            id="nothing"
-            className="
-                    transition-transform duration-300 w-1/4 max-md:min-w-[100vw] bg-yellow-500
+            className={`
+                    ${
+                        panelStates.first === "0%"
+                            ? "max-md:translate-x-0"
+                            : panelStates.first === "-100%"
+                            ? "max-md:-translate-x-full"
+                            : panelStates.first === "-200%"
+                            ? "max-md:-translate-x-[200%]"
+                            : ""
+                    }
+                    transition-transform duration-300 bg-yellow-500
                     relative overflow-hidden
-                    "
+                    `}
         >
-            <MainPanel
-                changeFocus={changeFocus}
-                currentChat={currentChat}
-                nextWindow={next}
-                previousWindow={previous}
-                setWindowType={setWindowType}
-            />
+            <MainPanel changeFocus={changeFocus} useChat={useChat} nextWindow={next} previousWindow={previous} setWindowType={setWindowType} />
             <MultiStep multiStepState={multiStepState} next={next} previous={previous} setCount={setCount}>
                 <FirstWindow
                     args={{ newGroup, setNewGroup }}

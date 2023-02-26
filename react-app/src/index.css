@@ -17,12 +17,10 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
     --custom-grey: rgba(112, 117, 121, 0.08);
-}
 
-.chat-parent {
-    background-image: url("/bg.jpeg");
-    background-size: 20%;
-    background-repeat: repeat;
+    --left-bar: 25vw;
+    --center-bar: 75vw;
+    --right-bar: 25vw;
 }
 
 .custom-shadow {
@@ -45,11 +43,28 @@
     color: rgb(203 213 225 / 1);
 }
 
-@media not all and (min-width: 768px) {
-    #chatbar-visible {
-        transform: translateX(-100%);
+.chat-parent {
+    background-image: url("/bg.jpeg");
+    background-repeat: repeat;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+@media (min-width: 768px) {
+    .chat-parent {
+        background-image: url("/bg.jpeg");
+        background-repeat: repeat;
+        transition-property: transform, background-size;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
     }
-    #sidebar-invisible {
+
+    .show-kick-member-button:hover > div:nth-child(1) {
+        transform: translateX(-25%);
+    }
+
+    .show-kick-member-button:hover > div:nth-child(2) {
         transform: translateX(-100%);
     }
 }

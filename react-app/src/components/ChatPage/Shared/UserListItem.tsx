@@ -9,7 +9,7 @@ export function UserListItem({
     return (
         <li
             className={`flex items-center h-14 w-full rounded-md ${
-                hoverEffect ? "hover:bg-slate-100" : ""
+                hoverEffect ? "hover:bg-slate-50" : ""
             } cursor-pointer select-none transition-colors`}
         >
             <img draggable={false} src={profileImageURL} className="rounded-full h-11 w-11 ml-2 mr-3" />

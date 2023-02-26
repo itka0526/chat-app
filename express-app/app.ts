@@ -162,6 +162,8 @@ io.on("connection", (socket) => {
     HandleUserInstance.findUsers();
 
     HandleGroupInstance.CreateAndReturnUpdatedList();
+    HandleGroupInstance.HandleReturnMembers();
+    HandleGroupInstance.HandleKickMember();
 });
 
 server.listen(PORT, () => console.log("server is running on port: " + PORT));

@@ -1,25 +1,42 @@
 import { useState } from "react";
-import { changeFocusArgs } from "../../types";
-import { Chat } from "../../serverTypes";
 
-export function useChangeFocus(parentElement: React.RefObject<HTMLElement>) {
+import { Chat } from "../../serverTypes";
+import { FocusableOptions, PossiblePanelStates } from "../../types";
+
+export function useChangeFocus() {
     const [currentChat, setCurrentChat] = useState<Chat | null>(null);
-    const changeFocus = ({ focusTo, chat }: changeFocusArgs) => {
-        setCurrentChat(chat);
-        const sideBar = parentElement.current?.children[0],
-            chatBar = parentElement.current?.children[1];
-        if (focusTo === "sidebar") {
-            if (chatBar?.id && sideBar?.id) {
-                chatBar.id = "chatbar-invisible";
-                sideBar.id = "sidebar-visible";
-            }
-        } else if (focusTo === "chatbar") {
-            if (chatBar?.id && sideBar?.id) {
-                chatBar.id = "chatbar-visible";
-                sideBar.id = "sidebar-invisible";
-            }
+
+    const [panelStates, setPanelStates] = useState<PossiblePanelStates>({
+        first: "0%",
+        second: "0%",
+        third: "0%",
+    });
+
+    const changeFocus = ({ focusTo }: FocusableOptions) => {
+        if (focusTo === "leftbar") {
+            setPanelStates({
+                first: "0%",
+                second: "0%",
+                third: "0%",
+            });
+        }
+
+        if (focusTo === "chatbar") {
+            setPanelStates({
+                first: "-100%",
+                second: "-100%",
+                third: "0%",
+            });
+        }
+
+        if (focusTo === "rightbar") {
+            setPanelStates({
+                first: "-200%",
+                second: "-200%",
+                third: "-200%",
+            });
         }
     };
 
-    return { changeFocus, currentChat };
+    return { changeFocus, currentChat, setCurrentChat, panelStates };
 }
