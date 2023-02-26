@@ -203,6 +203,7 @@ class HandleGroups extends BaseHelperClass {
 
                         const result = await prisma.databaseUser.findUnique({
                             select: { chat_list: true },
+                            // Kicked member should get its the updated list
                             where: { email: socket[1].data.userInfo.email },
                         });
 
