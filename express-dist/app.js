@@ -137,15 +137,20 @@ io.use((socket, next) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 io.on("connection", (socket) => {
     const { HandleChatsInstance, HandleGroupInstance, HandleFriendsInstance, HandleUserInstance } = new socket_io_functions_1.ServerSocketIOFunctions(io, socket);
-    HandleChatsInstance.getChat();
-    HandleChatsInstance.getChatList();
-    HandleChatsInstance.postChat();
-    HandleFriendsInstance.handleReturningOfListOfFriends();
-    HandleFriendsInstance.handleAddingFriends();
-    HandleUserInstance.findUsers();
-    HandleGroupInstance.CreateAndReturnUpdatedList();
-    HandleGroupInstance.HandleReturnMembers();
-    HandleGroupInstance.HandleKickMember();
-    HandleGroupInstance.HandleDeleteGroup();
+    try {
+        HandleChatsInstance.getChat();
+        HandleChatsInstance.getChatList();
+        HandleChatsInstance.postChat();
+        HandleFriendsInstance.handleReturningOfListOfFriends();
+        HandleFriendsInstance.handleAddingFriends();
+        HandleUserInstance.findUsers();
+        HandleGroupInstance.CreateAndReturnUpdatedList();
+        HandleGroupInstance.HandleReturnMembers();
+        HandleGroupInstance.HandleKickMember();
+        HandleGroupInstance.HandleDeleteGroup();
+    }
+    catch (err) {
+        console.error(err);
+    }
 });
 server.listen(PORT, () => console.log("server is running on port: " + PORT));

@@ -152,19 +152,23 @@ io.use(async (socket, next) => {
 io.on("connection", (socket) => {
     const { HandleChatsInstance, HandleGroupInstance, HandleFriendsInstance, HandleUserInstance } = new ServerSocketIOFunctions(io, socket);
 
-    HandleChatsInstance.getChat();
-    HandleChatsInstance.getChatList();
-    HandleChatsInstance.postChat();
+    try {
+        HandleChatsInstance.getChat();
+        HandleChatsInstance.getChatList();
+        HandleChatsInstance.postChat();
 
-    HandleFriendsInstance.handleReturningOfListOfFriends();
-    HandleFriendsInstance.handleAddingFriends();
+        HandleFriendsInstance.handleReturningOfListOfFriends();
+        HandleFriendsInstance.handleAddingFriends();
 
-    HandleUserInstance.findUsers();
+        HandleUserInstance.findUsers();
 
-    HandleGroupInstance.CreateAndReturnUpdatedList();
-    HandleGroupInstance.HandleReturnMembers();
-    HandleGroupInstance.HandleKickMember();
-    HandleGroupInstance.HandleDeleteGroup();
+        HandleGroupInstance.CreateAndReturnUpdatedList();
+        HandleGroupInstance.HandleReturnMembers();
+        HandleGroupInstance.HandleKickMember();
+        HandleGroupInstance.HandleDeleteGroup();
+    } catch (err) {
+        console.error(err);
+    }
 });
 
 server.listen(PORT, () => console.log("server is running on port: " + PORT));
