@@ -34,10 +34,10 @@ export function DeleteGroup({ currentChat }: DeleteGroup) {
                 createPortal(
                     <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border max-md:w-4/5 w-2/5 rounded-md z-50 cover-bg-shadow bg-white ">
                         <div className="w-full flex flex-col items-center">
-                            <div className="flex w-full justify-center items-center py-2 relative">
-                                <span className="text-red-400 text-lg font-semibold">Delete "{currentChat.chatName}"</span>
+                            <div className="flex w-full justify-center items-center py-2 relative isolate">
+                                <span className="text-red-400 text-lg font-semibold overflow-ellipsis">Delete "{currentChat.chatName}"</span>
                                 <div
-                                    className="absolute right-3 hover:bg-gray-100 transition-colors rounded-full p-1 cursor-pointer"
+                                    className="absolute right-3 hover:bg-gray-100 transition-colors rounded-full p-1 cursor-pointer z-10"
                                     onClick={closeDialog}
                                 >
                                     <X />

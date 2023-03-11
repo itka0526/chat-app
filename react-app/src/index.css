@@ -23,6 +23,16 @@
     --right-bar: 25vw;
 }
 
+#main-element {
+    height: 100vh;
+}
+
+.custom-drop-shadow {
+    --tw-drop-shadow: drop-shadow(0 0px 15px rgb(0 0 0 / 0.07)) drop-shadow(0 0px 7px rgb(0 0 0 / 0.08));
+    filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate)
+        var(--tw-sepia) var(--tw-drop-shadow);
+}
+
 .custom-shadow {
     --tw-shadow: 0 4px 16px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
@@ -55,6 +65,55 @@
     transition-duration: 300ms;
 }
 
+.custom-notification {
+    position: relative;
+    animation: initialAnimation 4.5s 1 forwards;
+    /* animation: name duration timing-function delay iteration-count direction fill-mode; */
+}
+
+.custom-notification .text {
+    height: 100%;
+    width: 16rem;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    z-index: 1;
+
+    transform: translateX(-50%);
+    opacity: 0;
+    animation: textAnimation ease 0.5s forwards;
+    animation-delay: 1s;
+}
+
+.custom-notification .quadrate-1 {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+
+    background-color: white;
+    filter: blur(0.75px);
+
+    transform: translateX(-50%);
+    animation: translatingSquare ease 1.25s forwards;
+    overflow: hidden;
+}
+
+@supports (height: 100svh) {
+    #main-element {
+        height: 100svh;
+    }
+}
+
+@media (max-width: 768px) {
+    .custom-notification .quadrate-1 {
+        border: 1px solid #eee;
+    }
+}
+
 @media (min-width: 768px) {
     .chat-parent {
         background-image: url("/bg.jpeg");
@@ -83,5 +142,50 @@
 
     .custom-reddening-effect:hover > div > .show-x-button {
         opacity: 1;
+    }
+}
+
+@keyframes blueLine {
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes initialAnimation {
+    0%,
+    100% {
+        transform: translateY(-8rem);
+    }
+    30%,
+    87.5% {
+        transform: translateY(2rem);
+    }
+}
+
+@keyframes translatingSquare {
+    0%,
+    50% {
+        width: 4rem;
+        border-radius: 50%;
+    }
+    90% {
+        filter: blur(0.5px);
+    }
+    100% {
+        border-radius: 8px;
+        filter: blur(0px);
+        width: 16rem;
+    }
+}
+
+@keyframes textAnimation {
+    0%,
+    45% {
+        filter: blur(0.25px);
+        opacity: 90%;
+    }
+    100% {
+        filter: blur(0px);
+        opacity: 100%;
     }
 }
