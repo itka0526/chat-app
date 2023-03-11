@@ -45,6 +45,7 @@ export interface ClientToServerEvents {
     post_chat: (chatId: Chat["id"], user: DatabaseUser, message: Message["text"]) => void;
     get_members: (chatId: Chat["id"]) => void;
     kick_member: (email: DatabaseUser["email"], chatId: Chat["id"]) => void;
+    delete_group: (chatId: Chat["id"]) => void;
 }
 
 export interface InterServerEvents {

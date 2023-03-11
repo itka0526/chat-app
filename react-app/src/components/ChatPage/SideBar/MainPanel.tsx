@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { FocusableOptions, SidePanelController, useChat } from "../../../types";
 import { SidePanelMenu } from "./SIdePanelMenu/SidePanelMenu";
 import { TopBar } from "../Shared/TopBar";
@@ -18,6 +18,16 @@ export function MainPanel({ nextWindow, setWindowType, changeFocus, useChat }: M
     const socket = useContext(SocketIOContext);
 
     const { chatList, loading } = useChatList(socket);
+
+    const [currentChat, setCurrentChat] = useChat;
+
+    useEffect(() => {
+        /**
+         *  If chat list does not contain the active chat we should reset active/currentChat to null
+         */
+
+        if (currentChat?.id && !chatList.map((c) => c.id).includes(currentChat.id)) setCurrentChat(null);
+    }, [chatList, currentChat]);
 
     const { filteredData, rawInput, handleChange } = useSortMainPanel(500, chatList);
 

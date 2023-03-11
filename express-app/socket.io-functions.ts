@@ -218,6 +218,60 @@ class HandleGroups extends BaseHelperClass {
             }
         });
     }
+
+    public HandleDeleteGroup() {
+        /**
+         *  This function should handle deletion of group
+         *  in order to delete a group the user must be an admin
+         */
+
+        this.socket.on("delete_group", async (chatId) => {
+            /**
+             *  Checking if the user is actually admin of that group and knows the group id!
+             *  Or the group does not exist !
+             */
+
+            if (!(await exists(prisma.chat, { where: { id: chatId, admin: this.socket.data.userInfo?.email } })))
+                return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "You do not have permission to delete." });
+
+            /**
+             *  Delete the group!
+             */
+
+            prisma.chat.delete({ where: { id: chatId }, select: { members: { select: { email: true } } } }).then(
+                async (result) => {
+                    if (!result)
+                        return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "The group does not have any members." });
+
+                    const onlyEmails = result.members.map((m) => m.email);
+
+                    /**
+                     *  Checking if in the list there is an email, if so, send a message to notify them!
+                     *  And make sure that they all leave the socket room too!
+                     */
+
+                    for (const socket of this.io.of("/").sockets)
+                        if (socket[1].data.userInfo?.email && onlyEmails.includes(socket[1].data.userInfo?.email)) {
+                            socket[1].leave(chatId);
+
+                            const result = await prisma.databaseUser.findUnique({
+                                select: { chat_list: true },
+                                where: { email: socket[1].data.userInfo.email },
+                            });
+
+                            if (!result?.chat_list) {
+                                this.io.to(socket[1].id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+                            } else if (result?.chat_list) {
+                                this.io.to(socket[1].id).emit("respond_chat_list", result.chat_list);
+                            }
+                        }
+                },
+                (err) => {
+                    console.log(err);
+                }
+            );
+        });
+    }
 }
 
 class HandleChats extends BaseHelperClass {

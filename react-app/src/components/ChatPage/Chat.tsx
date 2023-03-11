@@ -29,7 +29,7 @@ export function Chats({ user }: { user: User }) {
                 >
                     <LeftBar panelStates={panelStates} changeFocus={changeFocus} useChat={[currentChat, setCurrentChat]} user={user} />
                     <ChatBar panelStates={panelStates} changeFocus={changeFocus} currentChat={currentChat} user={user} />
-                    <RightBar panelStates={panelStates} changeFocus={changeFocus} currentChat={currentChat} />
+                    <RightBar panelStates={panelStates} changeFocus={changeFocus} currentChat={currentChat} user={user} />
                 </main>
             </SocketIOContext.Provider>
         </>

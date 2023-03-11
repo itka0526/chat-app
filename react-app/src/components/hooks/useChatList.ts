@@ -9,6 +9,10 @@ export const useChatList = (socket: SocketIOInstance) => {
         if (!socket) return;
 
         const listener = (list: Chat[]) => {
+            /**
+             *  Remove the loading skeleton set the incoming chat list
+             */
+
             setLoading(false);
             setChatList(list);
         };

@@ -5,14 +5,17 @@ import { GoBack } from "../Shared/GoBack";
 import { TopBar } from "../Shared/TopBar";
 import { SocketIOContext } from "../Chat";
 import { KickMembers } from "./KickMembers";
+import { DeleteGroup } from "./DeleteGroup";
+import { User } from "firebase/auth";
 
 type RightPanelProps = {
     panelStates: PossiblePanelStates;
     changeFocus: ({ focusTo }: FocusableOptions) => void;
     currentChat: Chat | null;
+    user: User;
 };
 
-export function RightBar({ panelStates, changeFocus, currentChat }: RightPanelProps) {
+export function RightBar({ panelStates, changeFocus, currentChat, user }: RightPanelProps) {
     const goBack = () => changeFocus({ focusTo: "chatbar" });
 
     const [members, setMembers] = useState<DatabaseUser[]>([]);
@@ -41,7 +44,7 @@ export function RightBar({ panelStates, changeFocus, currentChat }: RightPanelPr
             className={`
                 ${panelStates.third === "-200%" ? "md:translate-x-[-100%] max-md:translate-x-[-200%]" : ""}
                 bg-white transition-transform duration-300
-                grid grid-rows-[3.5rem,1fr] 
+                grid grid-rows-[3.5rem,1fr]
             `}
         >
             <TopBar>
@@ -52,7 +55,10 @@ export function RightBar({ panelStates, changeFocus, currentChat }: RightPanelPr
                     </div>
                 </div>
             </TopBar>
-            <div>{currentChat?.id && <KickMembers members={members} currentChat={currentChat} />}</div>
+            <div className="h-full relative">
+                {currentChat?.id && <KickMembers members={members} currentChat={currentChat} />}
+                {currentChat?.admin === user.email && <DeleteGroup currentChat={currentChat} />}
+            </div>
         </section>
     );
 }
