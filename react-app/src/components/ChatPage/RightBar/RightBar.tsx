@@ -51,7 +51,7 @@ export function RightBar({ panelStates, changeFocus, currentChat, user }: RightP
                 <div className="shadow-sm border-l border-[var(--custom-grey)] h-full w-full flex items-center px-4 ">
                     <GoBack onArrowClick={goBack} />
                     <div className="flex pl-4 grow select-none">
-                        <span className="text-lg font-semibold text-ellipsis">Members</span>
+                        <span className="text-lg font-semibold text-ellipsis">Settings</span>
                     </div>
                 </div>
             </TopBar>

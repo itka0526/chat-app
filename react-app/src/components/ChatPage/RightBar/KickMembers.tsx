@@ -10,16 +10,19 @@ export function KickMembers({ members, currentChat }: { members: DatabaseUser[];
     };
 
     return (
-        <ul className="pt-2">
-            {members.map((member) => (
-                <KickMember
-                    isAdmin={member.email === currentChat.admin}
-                    user={member}
-                    handleKickMember={handleKickMember}
-                    key={`kick-user-${member.email}`}
-                />
-            ))}
-        </ul>
+        <div className="w-full pt-2">
+            <span className="font-medium pl-2">Members</span>
+            <ul className="pt-2">
+                {members.map((member) => (
+                    <KickMember
+                        isAdmin={member.email === currentChat.admin}
+                        user={member}
+                        handleKickMember={handleKickMember}
+                        key={`kick-user-${member.email}`}
+                    />
+                ))}
+            </ul>
+        </div>
     );
 }
 
