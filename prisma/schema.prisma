@@ -55,6 +55,6 @@ model Message {
   updatedAt      DateTime     @updatedAt
   messenger      DatabaseUser @relation(fields: [messengerEmail], references: [email])
   messengerEmail String
-  chat           Chat         @relation(fields: [chatId], references: [id])
+  chat           Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId         String
 }

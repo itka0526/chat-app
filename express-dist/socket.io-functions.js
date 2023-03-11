@@ -172,6 +172,7 @@ class HandleGroups extends BaseHelperClass {
                         socket[1].leave(chatId);
                         const result = yield db_1.prisma.databaseUser.findUnique({
                             select: { chat_list: true },
+                            // Kicked member should get its the updated list
                             where: { email: socket[1].data.userInfo.email },
                         });
                         if (!(result === null || result === void 0 ? void 0 : result.chat_list)) {
@@ -184,6 +185,50 @@ class HandleGroups extends BaseHelperClass {
                 }
                 return this.io.to(chatId).emit("respond_get_members", membersResult.members);
             }
+        }));
+    }
+    HandleDeleteGroup() {
+        /**
+         *  This function should handle deletion of group
+         *  in order to delete a group the user must be an admin
+         */
+        this.socket.on("delete_group", (chatId) => __awaiter(this, void 0, void 0, function* () {
+            /**
+             *  Checking if the user is actually admin of that group and knows the group id!
+             *  Or the group does not exist !
+             */
+            var _a;
+            if (!(yield (0, functions_1.exists)(db_1.prisma.chat, { where: { id: chatId, admin: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email } })))
+                return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "You do not have permission to delete." });
+            /**
+             *  Delete the group!
+             */
+            db_1.prisma.chat.delete({ where: { id: chatId }, select: { members: { select: { email: true } } } }).then((result) => __awaiter(this, void 0, void 0, function* () {
+                var _b, _c;
+                if (!result)
+                    return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "The group does not have any members." });
+                const onlyEmails = result.members.map((m) => m.email);
+                /**
+                 *  Checking if in the list there is an email, if so, send a message to notify them!
+                 *  And make sure that they all leave the socket room too!
+                 */
+                for (const socket of this.io.of("/").sockets)
+                    if (((_b = socket[1].data.userInfo) === null || _b === void 0 ? void 0 : _b.email) && onlyEmails.includes((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email)) {
+                        socket[1].leave(chatId);
+                        const result = yield db_1.prisma.databaseUser.findUnique({
+                            select: { chat_list: true },
+                            where: { email: socket[1].data.userInfo.email },
+                        });
+                        if (!(result === null || result === void 0 ? void 0 : result.chat_list)) {
+                            this.io.to(socket[1].id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+                        }
+                        else if (result === null || result === void 0 ? void 0 : result.chat_list) {
+                            this.io.to(socket[1].id).emit("respond_chat_list", result.chat_list);
+                        }
+                    }
+            }), (err) => {
+                console.log(err);
+            });
         }));
     }
 }
