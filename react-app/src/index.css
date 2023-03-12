@@ -102,9 +102,9 @@
     overflow: hidden;
 }
 
-@supports (height: 100svh) {
+@supports (height: 100dvh) {
     #main-element {
-        height: 100svh;
+        height: 100dvh;
     }
 }
 
