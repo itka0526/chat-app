@@ -22,7 +22,6 @@ export function Chats({ user }: { user: User }) {
                 <main
                     id="main-element"
                     className={`
-
                         grid grid-cols-[100vw,100vw,100vw] md:grid-cols-[var(--left-bar),var(--center-bar),var(--right-bar)] transition-transform
                         relative
                     `}
