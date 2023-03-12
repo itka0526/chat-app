@@ -1,9 +1,17 @@
 import { Server, Socket } from "socket.io";
-import { ClientToServerEvents, InterServerEvents, NotifyFunctionArgs, ServerToClientEvents, SocketData, UIMessage } from "./types";
+import {
+    ClientToServerEvents,
+    DefaultNotification,
+    InterServerEvents,
+    MessageNotification,
+    Notification,
+    ServerToClientEvents,
+    SocketData,
+    UIMessage,
+} from "./types";
 import { prisma } from "./db";
 import { writeFile } from "fs/promises";
 import { exists } from "./functions";
-import { Message, DatabaseUser } from "@prisma/client";
 
 export const consoleObject = async (...args: any) => await writeFile("../results.json", JSON.stringify([...args], null, 2));
 
@@ -19,8 +27,14 @@ class BaseHelperClass {
         this.io = io;
     }
 
-    public notify({ socket, message, type }: NotifyFunctionArgs) {
-        this.io.to(socket.id).emit("notify", { message: message, type: type });
+    public notify({
+        socket,
+        message,
+        type,
+    }: Notification<DefaultNotification | MessageNotification> & {
+        socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
+    }) {
+        this.io.to(socket.id).emit("notify", { message, type } as Notification<DefaultNotification | MessageNotification>);
     }
 }
 
@@ -294,22 +308,23 @@ class HandleChats extends BaseHelperClass {
     }
 
     public postChat() {
-        this.socket.on("post_chat", async (chatId, user, message = "") => {
+        this.socket.on("post_chat", async (chat, user, message = "") => {
             const userA = this.socket.data.userInfo?.email;
             if (!userA) return this.socket.disconnect();
 
-            if (!chatId) return;
+            if (!chat.id) return;
 
             const { id: messageId } = await prisma.message.create({
                 data: {
                     text: message,
                     messengerEmail: userA,
-                    chatId: chatId,
+                    chatId: chat.id,
                 },
                 select: { id: true },
             });
 
             const msg: UIMessage = {
+                chatId: chat.id,
                 messageId: messageId,
                 text: message,
                 messengerEmail: userA,
@@ -317,7 +332,21 @@ class HandleChats extends BaseHelperClass {
                 profileImageURL: user.profileImageURL,
             };
 
-            return this.io.to(chatId).emit("respond_live_chat", msg);
+            /**
+             *  Passing chatId so on click the user can be taken to that chat!
+             */
+
+            const messageNotification: Notification<MessageNotification> = {
+                type: "New Message",
+                /**
+                 *  if message is too long send the first 25 characters
+                 */
+                message: { ...chat, displayName: msg.displayName, text: msg.text.substring(0, 25) },
+            };
+
+            this.io.to(chat.id).emit("notify", messageNotification);
+
+            return this.io.to(chat.id).emit("respond_live_chat", msg);
         });
     }
 
@@ -347,6 +376,7 @@ class HandleChats extends BaseHelperClass {
             })) || { messages: [] };
 
             const formattedMessages: UIMessage[] = result.messages.map((message) => ({
+                chatId: chatId,
                 messageId: message.id,
                 displayName: message.messenger.displayName,
                 messengerEmail: message.messengerEmail,
