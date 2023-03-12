@@ -35,7 +35,7 @@ export function ChatBar({ panelStates, changeFocus, currentChat, user, updatePre
                                 ? "max-md:-translate-x-[200%]"
                                 : ""
                         }
-                        grid grid-rows-[3.5rem,calc(100%-3.5rem)]
+                        grid grid-rows-[3.5rem,calc(100%-3.5rem)] overflow-hidden
                         chat-parent shadow-md
                     `}
             style={{ backgroundSize: panelStates.third === "-200%" ? "19%" : "20%" }}
@@ -51,7 +51,7 @@ export function ChatBar({ panelStates, changeFocus, currentChat, user, updatePre
                 </div>
             </TopBar>
 
-            <div className="relative h-full w-full">
+            <div className="relative h-full w-full overflow-hidden">
                 <div className="chat-section h-full w-full pb-20 md:pb-24 overflow-x-hidden overflow-y-auto flex flex-col-reverse relative ">
                     {currentChat?.id &&
                         messages.map((message, index) => {
