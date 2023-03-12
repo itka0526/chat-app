@@ -36,15 +36,23 @@ export type RespondAddFriendTypes = {
     message: "invalid_email" | "cannot_friend_yourself" | "user_does_not_exist" | "success" | "failed" | "already_friends" | "";
 };
 
-export type Notification = { type: "New Friend" | "Group Update" | "Unknown Error"; message: string };
+export type MessageNotification = {
+    type: "New Message";
+    message: { displayName: UIMessage["displayName"]; text: UIMessage["text"] } & Chat;
+};
 
-export type NotifyFunctionArgs = Notification & { socket: any };
+export type DefaultNotification = {
+    type: "New Friend" | "Group Update" | "Unknown Error";
+    message: string;
+};
+
+export type Notification<T> = T extends MessageNotification ? MessageNotification : T extends DefaultNotification ? DefaultNotification : never;
 
 export type MessageLoadingOptions = "initial" | "more";
 
 export interface ServerToClientEvents {
     // only server to client events
-    notify: (notification: Notification) => void;
+    notify: (notification: Notification<any>) => void;
     // respond with list of friends back to the 'socket'
     respond_list_of_friends: (friends: DatabaseUser[]) => void;
     respond_add_friend: (response: RespondAddFriendTypes) => void;
@@ -62,7 +70,7 @@ export interface ClientToServerEvents {
     create_group: (args: { admin: Chat["admin"]; chatName: Chat["chatName"]; members: DatabaseUser["email"][] }) => void;
     chat_list: () => void;
     get_chat: (chatId: Chat["id"], filter: { skip: number; take: number }, type: MessageLoadingOptions) => void;
-    post_chat: (chatId: Chat["id"], user: DatabaseUser, message: Message["text"]) => void;
+    post_chat: (chat: Chat, user: DatabaseUser, message: Message["text"]) => void;
     get_members: (chatId: Chat["id"]) => void;
     kick_member: (email: DatabaseUser["email"], chatId: Chat["id"]) => void;
     delete_group: (chatId: Chat["id"]) => void;
@@ -77,6 +85,7 @@ export interface SocketData {
 }
 
 export type UIMessage = {
+    chatId: Chat["id"];
     messageId: Message["id"];
     text: Message["text"];
     messengerEmail: DatabaseUser["email"];

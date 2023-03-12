@@ -57,7 +57,7 @@ export function RightBar({ panelStates, changeFocus, currentChat, user }: RightP
             </TopBar>
             <div className="h-full relative">
                 {currentChat?.id && <KickMembers members={members} currentChat={currentChat} />}
-                {currentChat?.admin === user.email && <DeleteGroup currentChat={currentChat} />}
+                {currentChat?.admin === user.email && <DeleteGroup currentChat={currentChat} changeFocus={changeFocus} />}
             </div>
         </section>
     );

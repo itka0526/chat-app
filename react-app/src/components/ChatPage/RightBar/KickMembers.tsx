@@ -11,7 +11,7 @@ export function KickMembers({ members, currentChat }: { members: DatabaseUser[];
 
     return (
         <div className="w-full pt-2">
-            <span className="font-medium pl-2">Members</span>
+            <span className="font-medium pl-2 ">Members</span>
             <ul className="pt-2">
                 {members.map((member) => (
                     <KickMember

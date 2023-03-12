@@ -68,6 +68,11 @@ export function useMessages({ socket, currentChat, user }: { socket: SocketIOIns
         };
 
         const listenerLive = (message: UIMessage) => {
+            /**
+             *  if the incoming real-time message chat id does not match with active chat's id just return
+             *  because this will cause an UI issue
+             */
+            if (message.chatId !== currentChat?.id) return;
             setMessages((prevMessages) => [message, ...prevMessages]);
         };
 

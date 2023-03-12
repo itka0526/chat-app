@@ -20,8 +20,8 @@ class BaseHelperClass {
         this.socket = socket;
         this.io = io;
     }
-    notify({ socket, message, type }) {
-        this.io.to(socket.id).emit("notify", { message: message, type: type });
+    notify({ socket, message, type, }) {
+        this.io.to(socket.id).emit("notify", { message, type });
     }
 }
 class ServerSocketIOFunctions extends BaseHelperClass {
@@ -252,29 +252,41 @@ class HandleChats extends BaseHelperClass {
         });
     }
     postChat() {
-        this.socket.on("post_chat", (chatId, user, message = "") => __awaiter(this, void 0, void 0, function* () {
+        this.socket.on("post_chat", (chat, user, message = "") => __awaiter(this, void 0, void 0, function* () {
             var _a;
             const userA = (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email;
             if (!userA)
                 return this.socket.disconnect();
-            if (!chatId)
+            if (!chat.id)
                 return;
             const { id: messageId } = yield db_1.prisma.message.create({
                 data: {
                     text: message,
                     messengerEmail: userA,
-                    chatId: chatId,
+                    chatId: chat.id,
                 },
                 select: { id: true },
             });
             const msg = {
+                chatId: chat.id,
                 messageId: messageId,
                 text: message,
                 messengerEmail: userA,
                 displayName: user.displayName,
                 profileImageURL: user.profileImageURL,
             };
-            return this.io.to(chatId).emit("respond_live_chat", msg);
+            /**
+             *  Passing chatId so on click the user can be taken to that chat!
+             */
+            const messageNotification = {
+                type: "New Message",
+                /**
+                 *  if message is too long send the first 25 characters
+                 */
+                message: Object.assign(Object.assign({}, chat), { displayName: msg.displayName, text: msg.text.substring(0, 25) }),
+            };
+            this.io.to(chat.id).emit("notify", messageNotification);
+            return this.io.to(chat.id).emit("respond_live_chat", msg);
         }));
     }
     getChat() {
@@ -303,6 +315,7 @@ class HandleChats extends BaseHelperClass {
                 },
             })) || { messages: [] };
             const formattedMessages = result.messages.map((message) => ({
+                chatId: chatId,
                 messageId: message.id,
                 displayName: message.messenger.displayName,
                 messengerEmail: message.messengerEmail,

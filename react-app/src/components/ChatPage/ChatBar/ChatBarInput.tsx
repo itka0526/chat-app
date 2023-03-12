@@ -9,7 +9,7 @@ export function ChatBarInput({ shrink, user, socket, currentChat }: CharBarInput
     const [input, setInput] = useState("");
 
     const handleSubmit = () => {
-        if (!currentChat?.id || !input) return;
+        if (!currentChat?.id || !input || !currentChat) return;
 
         if (!user.email) {
             socket?.disconnect();
@@ -18,7 +18,7 @@ export function ChatBarInput({ shrink, user, socket, currentChat }: CharBarInput
 
         socket?.emit(
             "post_chat",
-            currentChat?.id,
+            currentChat,
             { displayName: user.displayName || "anonymous", email: user.email, profileImageURL: user.photoURL || "" },
             input
         );
@@ -30,8 +30,8 @@ export function ChatBarInput({ shrink, user, socket, currentChat }: CharBarInput
             className={`
                 chat-input-section h-12 w-4/5 md:w-1/2
                 absolute bottom-5 md:bottom-8
-                transition-transform 
-                left-0 right-0 ml-auto mr-auto 
+                transition-transform
+                left-0 right-0 ml-auto mr-auto
 
                 ${currentChat?.id ? "" : "translate-y-28"}
                 ${shrink ? "md:-translate-x-[12.5vw]" : ""}

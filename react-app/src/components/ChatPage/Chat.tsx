@@ -17,7 +17,7 @@ export function Chats({ user }: { user: User }) {
 
     return (
         <>
-            <Notification socket={socketIOInstance} />
+            <Notification socket={socketIOInstance} useChat={[currentChat, setCurrentChat]} changeFocus={changeFocus} />
             <SocketIOContext.Provider value={socketIOInstance}>
                 <main
                     id="main-element"

@@ -2,19 +2,25 @@ import { useContext, useState } from "react";
 import { SocketIOContext } from "../Chat";
 import { createPortal } from "react-dom";
 import { Chat } from "../../../serverTypes";
-import { GradientDelimiter } from "../Shared/GradientDelimiter";
 import { X } from "react-feather";
+import { FocusableOptions } from "../../../types";
 
 type DeleteGroup = {
     currentChat: Chat;
+    changeFocus: ({ focusTo }: FocusableOptions) => void;
 };
 
-export function DeleteGroup({ currentChat }: DeleteGroup) {
+export function DeleteGroup({ currentChat, changeFocus }: DeleteGroup) {
     const socket = useContext(SocketIOContext);
 
     const [dialogState, setDialogState] = useState(false);
     const openDialog = () => setDialogState(true);
     const closeDialog = () => setDialogState(false);
+
+    const deleteGroup = () => {
+        handleRequest();
+        closeDialog();
+    };
 
     const handleRequest = () => {
         socket?.emit("delete_group", currentChat.id);
@@ -55,13 +61,7 @@ export function DeleteGroup({ currentChat }: DeleteGroup) {
                                 <button className=" px-4 py-1 rounded-md text-blue-600 hover:bg-gray-100 transition-colors " onClick={closeDialog}>
                                     Cancel
                                 </button>
-                                <button
-                                    className="px-4 py-1 rounded-md text-white bg-red-400"
-                                    onClick={() => {
-                                        handleRequest();
-                                        closeDialog();
-                                    }}
-                                >
+                                <button className="px-4 py-1 rounded-md text-white bg-red-400" onClick={deleteGroup}>
                                     Delete
                                 </button>
                             </div>

@@ -26,7 +26,10 @@ export function MainPanel({ nextWindow, setWindowType, changeFocus, useChat }: M
          *  If chat list does not contain the active chat we should reset active/currentChat to null
          */
 
-        if (currentChat?.id && !chatList.map((c) => c.id).includes(currentChat.id)) setCurrentChat(null);
+        if (currentChat?.id && !chatList.map((c) => c.id).includes(currentChat.id)) {
+            setCurrentChat(null);
+            changeFocus({ focusTo: "leftbar" });
+        }
     }, [chatList, currentChat]);
 
     const { filteredData, rawInput, handleChange } = useSortMainPanel(500, chatList);
@@ -63,12 +66,13 @@ type ChatInfoComponentProps = {
 };
 
 function ChatInfoComponent({ chatInfo, changeFocus, useChat: [currentChat, setCurrentChat] }: ChatInfoComponentProps) {
+    const handleClick = () => {
+        changeFocus({ focusTo: "chatbar" });
+        setCurrentChat(chatInfo);
+    };
     return (
         <li
-            onClick={() => {
-                changeFocus({ focusTo: "chatbar" });
-                setCurrentChat(chatInfo);
-            }}
+            onClick={handleClick}
             className={`flex items-center min-h-[3.5rem] w-full rounded-md ${
                 currentChat?.id === chatInfo.id ? "bg-gray-100" : "hover:bg-gray-100"
             } cursor-pointer select-none px-2 transition-colors`}

@@ -13,9 +13,7 @@ export function Login() {
 
     return (
         <main className="h-screen w-screen overflow-hidden touch-none">
-            <Suspense fallback={<canvas />}>
-                <ThreeJSReactModel />
-            </Suspense>
+            <Suspense fallback={<canvas />}>{/* <ThreeJSReactModel /> */}</Suspense>
             <button
                 title="Sign with google"
                 className="
