@@ -34,7 +34,7 @@ export function ChatBar({ panelStates, changeFocus, currentChat, user }: ChatBar
                                 ? "max-md:-translate-x-[200%]"
                                 : ""
                         }
-                        grid grid-rows-[3.5rem,calc(100vh-3.5rem)]
+                        grid grid-rows-[3.5rem,calc(100%-3.5rem)]
                         chat-parent shadow-md
                     `}
             style={{ backgroundSize: panelStates.third === "-200%" ? "19%" : "20%" }}

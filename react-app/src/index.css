@@ -23,8 +23,24 @@
     --right-bar: 25vw;
 }
 
+body {
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}
+
 #main-element {
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+}
+
+#main-element > section {
+    height: 100% !important;
 }
 
 .custom-drop-shadow {
@@ -100,12 +116,6 @@
     transform: translateX(-50%);
     animation: translatingSquare ease 1.25s forwards;
     overflow: hidden;
-}
-
-@supports (height: 100dvh) {
-    #main-element {
-        height: 100dvh;
-    }
 }
 
 @media (max-width: 768px) {
