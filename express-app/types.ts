@@ -30,6 +30,16 @@ export type Notification<T> = T extends MessageNotification ? MessageNotificatio
 
 export type MessageLoadingOptions = "initial" | "more";
 
+export type ExtendedChat = Chat & {
+    messages: {
+        createdAt: Date;
+        text: string;
+        messenger: {
+            displayName: string;
+        };
+    }[];
+};
+
 export interface ServerToClientEvents {
     // only server to client events
     notify: (notification: Notification<any>) => void;
@@ -37,7 +47,7 @@ export interface ServerToClientEvents {
     respond_list_of_friends: (friends: DatabaseUser[]) => void;
     respond_add_friend: (response: RespondAddFriendTypes) => void;
     respond_find_users: (user: DatabaseUser[]) => void;
-    respond_chat_list: (list: Chat[]) => void;
+    respond_chat_list: (list: ExtendedChat[]) => void;
     respond_get_chat: (messages: UIMessage[], type: MessageLoadingOptions) => void;
     respond_live_chat: (message: UIMessage) => void;
     respond_get_members: (updatedMembers: DatabaseUser[]) => void;
@@ -66,6 +76,7 @@ export interface SocketData {
 
 export type UIMessage = {
     chatId: Chat["id"];
+    createdAt: Date;
     messageId: Message["id"];
     text: Message["text"];
     messengerEmail: DatabaseUser["email"];

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Chat } from "../../serverTypes";
+import { Chat, ExtendedChat } from "../../serverTypes";
 import { FocusableOptions, PossiblePanelStates } from "../../types";
 
 export function useChangeFocus() {

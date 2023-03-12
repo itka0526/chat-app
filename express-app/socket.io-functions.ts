@@ -76,7 +76,18 @@ class HandleGroups extends BaseHelperClass {
 
             const result = await prisma.databaseUser.findUnique({
                 select: {
-                    chat_list: true,
+                    chat_list: {
+                        include: {
+                            /**
+                             *  Select the latest message for display purposes
+                             */
+                            messages: {
+                                orderBy: { createdAt: "desc" },
+                                take: 1,
+                                select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                            },
+                        },
+                    },
                 },
                 where: {
                     email: this.socket.data.userInfo?.email,
@@ -85,6 +96,8 @@ class HandleGroups extends BaseHelperClass {
 
             if (!result || !result.chat_list)
                 return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+
+            console.log(result);
 
             const chatIdList = result.chat_list.map((chat) => chat.id);
             this.socket.join(chatIdList);
@@ -96,25 +109,43 @@ class HandleGroups extends BaseHelperClass {
 
             for (const socket of this.io.of("/").sockets) {
                 if (socket[1].data.userInfo?.email && members.includes(socket[1].data.userInfo?.email)) {
-                    prisma.databaseUser.findUnique({ select: { chat_list: true }, where: { email: socket[1].data.userInfo.email } }).then(
-                        (successfulResult) => {
-                            if (successfulResult?.chat_list) {
-                                const chatIdList = result.chat_list.map((chat) => chat.id);
-                                socket[1].join(chatIdList);
-                                return this.io.to(socket[1].id).emit("respond_chat_list", successfulResult?.chat_list);
-                            } else {
-                                return this.io
-                                    .to(this.socket.id)
-                                    .emit("notify", { type: "Unknown Error", message: "Could not properly update chat list. Please reload." });
+                    prisma.databaseUser
+                        .findUnique({
+                            select: {
+                                chat_list: {
+                                    include: {
+                                        /**
+                                         *  Select the latest message for display purposes
+                                         */
+                                        messages: {
+                                            orderBy: { createdAt: "desc" },
+                                            take: 1,
+                                            select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                                        },
+                                    },
+                                },
+                            },
+                            where: { email: socket[1].data.userInfo.email },
+                        })
+                        .then(
+                            (successfulResult) => {
+                                if (successfulResult?.chat_list) {
+                                    const chatIdList = result.chat_list.map((chat) => chat.id);
+                                    socket[1].join(chatIdList);
+                                    return this.io.to(socket[1].id).emit("respond_chat_list", successfulResult?.chat_list);
+                                } else {
+                                    return this.io
+                                        .to(this.socket.id)
+                                        .emit("notify", { type: "Unknown Error", message: "Could not properly update chat list. Please reload." });
+                                }
+                            },
+                            () => {
+                                return this.io.to(this.socket.id).emit("notify", {
+                                    type: "Unknown Error",
+                                    message: "Failed to find user in database. Could not properly update chat list. Please reload.",
+                                });
                             }
-                        },
-                        () => {
-                            return this.io.to(this.socket.id).emit("notify", {
-                                type: "Unknown Error",
-                                message: "Failed to find user in database. Could not properly update chat list. Please reload.",
-                            });
-                        }
-                    );
+                        );
                 }
             }
         });
@@ -216,7 +247,20 @@ class HandleGroups extends BaseHelperClass {
                         socket[1].leave(chatId);
 
                         const result = await prisma.databaseUser.findUnique({
-                            select: { chat_list: true },
+                            select: {
+                                chat_list: {
+                                    include: {
+                                        /**
+                                         *  Select the latest message for display purposes
+                                         */
+                                        messages: {
+                                            orderBy: { createdAt: "desc" },
+                                            take: 1,
+                                            select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                                        },
+                                    },
+                                },
+                            },
                             // Kicked member should get its the updated list
                             where: { email: socket[1].data.userInfo.email },
                         });
@@ -269,7 +313,20 @@ class HandleGroups extends BaseHelperClass {
                             socket[1].leave(chatId);
 
                             const result = await prisma.databaseUser.findUnique({
-                                select: { chat_list: true },
+                                select: {
+                                    chat_list: {
+                                        include: {
+                                            /**
+                                             *  Select the latest message for display purposes
+                                             */
+                                            messages: {
+                                                orderBy: { createdAt: "desc" },
+                                                take: 1,
+                                                select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                                            },
+                                        },
+                                    },
+                                },
                                 where: { email: socket[1].data.userInfo.email },
                             });
 
@@ -293,7 +350,18 @@ class HandleChats extends BaseHelperClass {
         this.socket.on("chat_list", async () => {
             const result = await prisma.databaseUser.findUnique({
                 select: {
-                    chat_list: true,
+                    chat_list: {
+                        include: {
+                            /**
+                             *  Select the latest message for display purposes
+                             */
+                            messages: {
+                                orderBy: { createdAt: "desc" },
+                                take: 1,
+                                select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                            },
+                        },
+                    },
                 },
                 where: {
                     email: this.socket.data.userInfo?.email,
@@ -314,17 +382,18 @@ class HandleChats extends BaseHelperClass {
 
             if (!chat.id) return;
 
-            const { id: messageId } = await prisma.message.create({
+            const { id: messageId, createdAt: messageCreatedDate } = await prisma.message.create({
                 data: {
                     text: message,
                     messengerEmail: userA,
                     chatId: chat.id,
                 },
-                select: { id: true },
+                select: { id: true, createdAt: true },
             });
 
             const msg: UIMessage = {
                 chatId: chat.id,
+                createdAt: messageCreatedDate,
                 messageId: messageId,
                 text: message,
                 messengerEmail: userA,
@@ -365,6 +434,7 @@ class HandleChats extends BaseHelperClass {
                         orderBy: { id: "desc" },
                         select: {
                             id: true,
+                            createdAt: true,
                             text: true,
                             messengerEmail: true,
                             messenger: { select: { displayName: true, profileImageURL: true } },
@@ -377,6 +447,7 @@ class HandleChats extends BaseHelperClass {
 
             const formattedMessages: UIMessage[] = result.messages.map((message) => ({
                 chatId: chatId,
+                createdAt: message.createdAt,
                 messageId: message.id,
                 displayName: message.messenger.displayName,
                 messengerEmail: message.messengerEmail,

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { FocusableOptions, PossiblePanelStates } from "../../../types";
+import { FocusableOptions, PossiblePanelStates, UseChatListType } from "../../../types";
 import { GoBack } from "../Shared/GoBack";
 import { TopBar } from "../Shared/TopBar";
 import { Chat } from "../../../serverTypes";
@@ -16,11 +16,12 @@ type ChatBarProps = {
     changeFocus: ({ focusTo }: FocusableOptions) => void;
     currentChat: Chat | null;
     user: User;
+    updatePreviewMessages: UseChatListType["setChatList"];
 };
 
-export function ChatBar({ panelStates, changeFocus, currentChat, user }: ChatBarProps) {
+export function ChatBar({ panelStates, changeFocus, currentChat, user, updatePreviewMessages }: ChatBarProps) {
     const socket = useContext(SocketIOContext);
-    const { messages, loadMore, limitReached } = useMessages({ socket, currentChat, user });
+    const { messages, loadMore, limitReached } = useMessages({ socket, currentChat, user, updatePreviewMessages });
 
     return (
         <section
@@ -41,7 +42,7 @@ export function ChatBar({ panelStates, changeFocus, currentChat, user }: ChatBar
         >
             <TopBar>
                 <div className="shadow-sm h-full w-full flex items-center px-4 ">
-                    <GoBack extraClasses="hidden max-md:block" onArrowClick={() => changeFocus({ focusTo: "leftbar" })} />
+                    <GoBack extraClasses="hidden max-md:block px-3" onArrowClick={() => changeFocus({ focusTo: "leftbar" })} />
                     <div className="px-2 flex">
                         <span className="text-lg font-semibold text-ellipsis ">{currentChat && currentChat?.chatName}</span>
                     </div>

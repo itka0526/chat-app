@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDebounce } from "./useDebounce";
-import { Chat } from "../../serverTypes";
+import { Chat, ExtendedChat } from "../../serverTypes";
 import { NewGroupMember } from "../../types";
 
-export function useSortMainPanel(delay: number, array: Chat[]) {
+export function useSortMainPanel(delay: number, array: ExtendedChat[]) {
     const [rawInput, setRawInput] = useState("");
-    const [filteredData, setFilteredData] = useState<Chat[]>([]);
+    const [filteredData, setFilteredData] = useState<ExtendedChat[]>([]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setRawInput(e.target.value.toLowerCase());
 

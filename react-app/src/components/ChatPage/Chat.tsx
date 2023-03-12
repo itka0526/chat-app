@@ -7,13 +7,15 @@ import { SocketIOInstance } from "../../serverTypes";
 import { useSocketIO } from "../hooks/useSocketIO";
 import { Notification } from "./Notification";
 import { RightBar } from "./RightBar/RightBar";
+import { useChatList } from "../hooks/useChatList";
 
 export const SocketIOContext = createContext<SocketIOInstance>(null);
 
 export function Chats({ user }: { user: User }) {
-    const { panelStates, changeFocus, currentChat, setCurrentChat } = useChangeFocus();
-
     const socketIOInstance = useSocketIO(user);
+
+    const { panelStates, changeFocus, currentChat, setCurrentChat } = useChangeFocus();
+    const useChatListHookInstance = useChatList(socketIOInstance);
 
     return (
         <>
@@ -26,8 +28,20 @@ export function Chats({ user }: { user: User }) {
                         relative
                     `}
                 >
-                    <LeftBar panelStates={panelStates} changeFocus={changeFocus} useChat={[currentChat, setCurrentChat]} user={user} />
-                    <ChatBar panelStates={panelStates} changeFocus={changeFocus} currentChat={currentChat} user={user} />
+                    <LeftBar
+                        necessaryMainPanelProps={useChatListHookInstance}
+                        panelStates={panelStates}
+                        changeFocus={changeFocus}
+                        useChat={[currentChat, setCurrentChat]}
+                        user={user}
+                    />
+                    <ChatBar
+                        panelStates={panelStates}
+                        changeFocus={changeFocus}
+                        currentChat={currentChat}
+                        user={user}
+                        updatePreviewMessages={useChatListHookInstance.setChatList}
+                    />
                     <RightBar panelStates={panelStates} changeFocus={changeFocus} currentChat={currentChat} user={user} />
                 </main>
             </SocketIOContext.Provider>

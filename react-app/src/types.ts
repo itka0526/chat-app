@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from "react";
-import { Chat, RespondAddFriendTypes, DatabaseUser } from "./serverTypes";
+import { RespondAddFriendTypes, DatabaseUser, ExtendedChat, Chat } from "./serverTypes";
 import { User } from "firebase/auth";
 
 export type PossibleArgs = {
@@ -53,3 +53,11 @@ export type PossiblePanelStates = {
     second: "0%" | "-100%" | "-200%";
     third: "0%" | "-200%";
 };
+
+export type UseChatListType = {
+    chatList: ExtendedChat[];
+    setChatList: React.Dispatch<React.SetStateAction<ExtendedChat[]>>;
+    loading: boolean;
+};
+
+export type NecessaryMainPanelProps = UseChatListType;

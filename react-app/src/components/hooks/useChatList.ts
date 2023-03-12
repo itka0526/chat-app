@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import { Chat, SocketIOInstance } from "../../serverTypes";
+import { ExtendedChat, SocketIOInstance } from "../../serverTypes";
+import { UseChatListType } from "../../types";
 
 export const useChatList = (socket: SocketIOInstance) => {
-    const [chatList, setChatList] = useState<Chat[]>([]);
+    const [chatList, setChatList] = useState<ExtendedChat[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!socket) return;
 
-        const listener = (list: Chat[]) => {
+        const listener = (list: ExtendedChat[]) => {
             /**
              *  Remove the loading skeleton set the incoming chat list
              */
@@ -26,5 +27,5 @@ export const useChatList = (socket: SocketIOInstance) => {
         };
     }, [socket]);
 
-    return { chatList, loading };
+    return { chatList, setChatList, loading } satisfies UseChatListType;
 };

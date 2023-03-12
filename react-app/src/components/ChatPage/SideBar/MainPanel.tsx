@@ -1,24 +1,21 @@
 import { useContext, useEffect } from "react";
-import { FocusableOptions, SidePanelController, useChat } from "../../../types";
+import { FocusableOptions, NecessaryMainPanelProps, SidePanelController, useChat } from "../../../types";
 import { SidePanelMenu } from "./SIdePanelMenu/SidePanelMenu";
 import { TopBar } from "../Shared/TopBar";
 import { SocketIOContext } from "../Chat";
 import { useChatList } from "../../hooks/useChatList";
-import { Chat } from "../../../serverTypes";
+import { Chat, ExtendedChat } from "../../../serverTypes";
 import { MainPanelSearchBar } from "./MainPanelCompoenents/MainPanelSearchBar";
 import { SkeletonChat } from "../Shared/SidePanel/SkeletonChat";
 import { useSortMainPanel } from "../../hooks/useSort";
 
 type MainPanelProps = SidePanelController & {
+    necessaryMainPanelProps: NecessaryMainPanelProps;
     changeFocus: ({ focusTo }: FocusableOptions) => void;
     useChat: useChat;
 };
 
-export function MainPanel({ nextWindow, setWindowType, changeFocus, useChat }: MainPanelProps) {
-    const socket = useContext(SocketIOContext);
-
-    const { chatList, loading } = useChatList(socket);
-
+export function MainPanel({ necessaryMainPanelProps: { chatList, loading }, nextWindow, setWindowType, changeFocus, useChat }: MainPanelProps) {
     const [currentChat, setCurrentChat] = useChat;
 
     useEffect(() => {
@@ -60,7 +57,7 @@ export function MainPanel({ nextWindow, setWindowType, changeFocus, useChat }: M
 }
 
 type ChatInfoComponentProps = {
-    chatInfo: Chat;
+    chatInfo: ExtendedChat;
     changeFocus: ({ focusTo }: FocusableOptions) => void;
     useChat: useChat;
 };
@@ -75,10 +72,28 @@ function ChatInfoComponent({ chatInfo, changeFocus, useChat: [currentChat, setCu
             onClick={handleClick}
             className={`flex items-center min-h-[3.5rem] w-full rounded-md ${
                 currentChat?.id === chatInfo.id ? "bg-gray-100" : "hover:bg-gray-100"
-            } cursor-pointer select-none px-2 transition-colors`}
+            } cursor-pointer select-none px-2 transition-colors py-2`}
         >
-            <div className="flex flex-col w-full whitespace-nowrap text-ellipsis overflow-hidden">
-                <span className="font-medium">{chatInfo.chatName}</span>
+            <div className="flex w-full whitespace-nowrap text-ellipsis overflow-hidden gap-4 ">
+                <div className="rounded-full h-12 aspect-square bg-gray-200 "></div>
+                <div role="status" className=" w-full h-full flex flex-col relative">
+                    <span className="font-medium">{chatInfo.chatName}</span>
+                    <div className="absolute right-1 top-0">
+                        <span className="text-xs">
+                            {chatInfo.messages[0] &&
+                                chatInfo.messages[0].createdAt &&
+                                new Date(chatInfo.messages[0].createdAt).toLocaleTimeString().replace(/([\d]+:[\d]{2})(:[\d]{2})(.*)/, "$1$3")}
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-[auto,1fr] items-center w-full gap-2 ">
+                        <span className={`${chatInfo.messages[0] ? "after:content-[':']" : ""} relative`}>
+                            {chatInfo.messages[0] && chatInfo.messages[0].messenger.displayName}
+                        </span>
+                        <div className="grow-0 shrink-0 overflow-hidden overflow-ellipsis whitespace-nowrap">
+                            <span className="text-gray-600">{chatInfo.messages[0] && chatInfo.messages[0].text}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </li>
     );

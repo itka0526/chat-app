@@ -52,7 +52,18 @@ class HandleGroups extends BaseHelperClass {
             });
             const result = yield db_1.prisma.databaseUser.findUnique({
                 select: {
-                    chat_list: true,
+                    chat_list: {
+                        include: {
+                            /**
+                             *  Select the latest message for display purposes
+                             */
+                            messages: {
+                                orderBy: { createdAt: "desc" },
+                                take: 1,
+                                select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                            },
+                        },
+                    },
                 },
                 where: {
                     email: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email,
@@ -60,6 +71,7 @@ class HandleGroups extends BaseHelperClass {
             });
             if (!result || !result.chat_list)
                 return this.io.to(this.socket.id).emit("notify", { type: "Unknown Error", message: "Unable to find chat list." });
+            console.log(result);
             const chatIdList = result.chat_list.map((chat) => chat.id);
             this.socket.join(chatIdList);
             this.io.to(this.socket.id).emit("respond_chat_list", result.chat_list);
@@ -68,7 +80,25 @@ class HandleGroups extends BaseHelperClass {
              */
             for (const socket of this.io.of("/").sockets) {
                 if (((_b = socket[1].data.userInfo) === null || _b === void 0 ? void 0 : _b.email) && members.includes((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email)) {
-                    db_1.prisma.databaseUser.findUnique({ select: { chat_list: true }, where: { email: socket[1].data.userInfo.email } }).then((successfulResult) => {
+                    db_1.prisma.databaseUser
+                        .findUnique({
+                        select: {
+                            chat_list: {
+                                include: {
+                                    /**
+                                     *  Select the latest message for display purposes
+                                     */
+                                    messages: {
+                                        orderBy: { createdAt: "desc" },
+                                        take: 1,
+                                        select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                                    },
+                                },
+                            },
+                        },
+                        where: { email: socket[1].data.userInfo.email },
+                    })
+                        .then((successfulResult) => {
                         if (successfulResult === null || successfulResult === void 0 ? void 0 : successfulResult.chat_list) {
                             const chatIdList = result.chat_list.map((chat) => chat.id);
                             socket[1].join(chatIdList);
@@ -171,7 +201,20 @@ class HandleGroups extends BaseHelperClass {
                     if (((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email) === kickMemberEmail) {
                         socket[1].leave(chatId);
                         const result = yield db_1.prisma.databaseUser.findUnique({
-                            select: { chat_list: true },
+                            select: {
+                                chat_list: {
+                                    include: {
+                                        /**
+                                         *  Select the latest message for display purposes
+                                         */
+                                        messages: {
+                                            orderBy: { createdAt: "desc" },
+                                            take: 1,
+                                            select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                                        },
+                                    },
+                                },
+                            },
                             // Kicked member should get its the updated list
                             where: { email: socket[1].data.userInfo.email },
                         });
@@ -216,7 +259,20 @@ class HandleGroups extends BaseHelperClass {
                     if (((_b = socket[1].data.userInfo) === null || _b === void 0 ? void 0 : _b.email) && onlyEmails.includes((_c = socket[1].data.userInfo) === null || _c === void 0 ? void 0 : _c.email)) {
                         socket[1].leave(chatId);
                         const result = yield db_1.prisma.databaseUser.findUnique({
-                            select: { chat_list: true },
+                            select: {
+                                chat_list: {
+                                    include: {
+                                        /**
+                                         *  Select the latest message for display purposes
+                                         */
+                                        messages: {
+                                            orderBy: { createdAt: "desc" },
+                                            take: 1,
+                                            select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                                        },
+                                    },
+                                },
+                            },
                             where: { email: socket[1].data.userInfo.email },
                         });
                         if (!(result === null || result === void 0 ? void 0 : result.chat_list)) {
@@ -239,7 +295,18 @@ class HandleChats extends BaseHelperClass {
                 var _a;
                 const result = yield db_1.prisma.databaseUser.findUnique({
                     select: {
-                        chat_list: true,
+                        chat_list: {
+                            include: {
+                                /**
+                                 *  Select the latest message for display purposes
+                                 */
+                                messages: {
+                                    orderBy: { createdAt: "desc" },
+                                    take: 1,
+                                    select: { messenger: { select: { displayName: true } }, text: true, createdAt: true },
+                                },
+                            },
+                        },
                     },
                     where: {
                         email: (_a = this.socket.data.userInfo) === null || _a === void 0 ? void 0 : _a.email,
@@ -259,16 +326,17 @@ class HandleChats extends BaseHelperClass {
                 return this.socket.disconnect();
             if (!chat.id)
                 return;
-            const { id: messageId } = yield db_1.prisma.message.create({
+            const { id: messageId, createdAt: messageCreatedDate } = yield db_1.prisma.message.create({
                 data: {
                     text: message,
                     messengerEmail: userA,
                     chatId: chat.id,
                 },
-                select: { id: true },
+                select: { id: true, createdAt: true },
             });
             const msg = {
                 chatId: chat.id,
+                createdAt: messageCreatedDate,
                 messageId: messageId,
                 text: message,
                 messengerEmail: userA,
@@ -305,6 +373,7 @@ class HandleChats extends BaseHelperClass {
                         orderBy: { id: "desc" },
                         select: {
                             id: true,
+                            createdAt: true,
                             text: true,
                             messengerEmail: true,
                             messenger: { select: { displayName: true, profileImageURL: true } },
@@ -316,6 +385,7 @@ class HandleChats extends BaseHelperClass {
             })) || { messages: [] };
             const formattedMessages = result.messages.map((message) => ({
                 chatId: chatId,
+                createdAt: message.createdAt,
                 messageId: message.id,
                 displayName: message.messenger.displayName,
                 messengerEmail: message.messengerEmail,

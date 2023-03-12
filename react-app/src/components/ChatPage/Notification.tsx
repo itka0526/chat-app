@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Chat, DefaultNotification, MessageNotification, Notification, SocketIOInstance } from "../../serverTypes";
+import { Chat, DefaultNotification, ExtendedChat, MessageNotification, Notification, SocketIOInstance } from "../../serverTypes";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FocusableOptions, useChat } from "../../types";

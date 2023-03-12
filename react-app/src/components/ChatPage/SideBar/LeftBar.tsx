@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FocusableOptions, PossiblePanelStates, SidePanelStateTypes, useChat } from "../../../types";
+import { FocusableOptions, NecessaryMainPanelProps, PossiblePanelStates, SidePanelStateTypes, useChat } from "../../../types";
 import { MainPanel } from "./MainPanel";
 import { MultiStep } from "../Shared/MultiStep/MultiStep";
 import { useMultiStep } from "../../hooks/useMultiStep";
@@ -7,16 +7,16 @@ import { useHandleNewGroupStates } from "../../hooks/useHandleNewGroupStates";
 import { FirstWindow } from "./LeftBarPanels/FirstWindow";
 import { SecondWindow } from "./LeftBarPanels/SecondWindow";
 import { User } from "firebase/auth";
-import { Chat } from "../../../serverTypes";
 
 type LeftBarProps = {
     user: User;
     useChat: useChat;
     panelStates: PossiblePanelStates;
     changeFocus: ({ focusTo }: FocusableOptions) => void;
+    necessaryMainPanelProps: NecessaryMainPanelProps;
 };
 
-export function LeftBar({ panelStates, changeFocus, user, useChat }: LeftBarProps) {
+export function LeftBar({ necessaryMainPanelProps, panelStates, changeFocus, user, useChat }: LeftBarProps) {
     const { newGroup, newGroupName, setNewGroup, setNewGroupName } = useHandleNewGroupStates();
 
     const { multiStepState, next, previous, setCount } = useMultiStep();
@@ -39,7 +39,14 @@ export function LeftBar({ panelStates, changeFocus, user, useChat }: LeftBarProp
                     relative overflow-hidden
                     `}
         >
-            <MainPanel changeFocus={changeFocus} useChat={useChat} nextWindow={next} previousWindow={previous} setWindowType={setWindowType} />
+            <MainPanel
+                necessaryMainPanelProps={necessaryMainPanelProps}
+                changeFocus={changeFocus}
+                useChat={useChat}
+                nextWindow={next}
+                previousWindow={previous}
+                setWindowType={setWindowType}
+            />
             <MultiStep multiStepState={multiStepState} next={next} previous={previous} setCount={setCount}>
                 <FirstWindow
                     args={{ newGroup, setNewGroup }}

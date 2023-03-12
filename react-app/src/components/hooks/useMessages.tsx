@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Chat, MessageLoadingOptions, SocketIOInstance, UIMessage } from "../../serverTypes";
 import { User } from "firebase/auth";
+import { UseChatListType } from "../../types";
 
-export function useMessages({ socket, currentChat, user }: { socket: SocketIOInstance; currentChat: Chat | null; user: User }) {
+type useMessagesProps = { socket: SocketIOInstance; currentChat: Chat | null; user: User; updatePreviewMessages: UseChatListType["setChatList"] };
+
+export function useMessages({ socket, currentChat, user, updatePreviewMessages }: useMessagesProps) {
     const [messages, setMessages] = useState<UIMessage[]>([]);
 
     const [keepState, setKeepState] = useState({ skip: 0, take: 25 });
@@ -69,9 +72,24 @@ export function useMessages({ socket, currentChat, user }: { socket: SocketIOIns
 
         const listenerLive = (message: UIMessage) => {
             /**
+             *  Could update chat list's quick preview message
+             */
+
+            updatePreviewMessages((prev) => {
+                const chatListWithUpdatedPreview = prev.map((chat) => {
+                    if (chat.id === message.chatId) {
+                        chat.messages[0] = { createdAt: message.createdAt, messenger: { displayName: message.displayName }, text: message.text };
+                    }
+                    return chat;
+                });
+                return chatListWithUpdatedPreview;
+            });
+
+            /**
              *  if the incoming real-time message chat id does not match with active chat's id just return
              *  because this will cause an UI issue
              */
+
             if (message.chatId !== currentChat?.id) return;
             setMessages((prevMessages) => [message, ...prevMessages]);
         };
